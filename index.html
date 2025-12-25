@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Teaching</title>
+    <script>
+        // Dynamic viewer loader with failover
+        document.addEventListener('DOMContentLoaded', () => {
+            const pdfViewer = document.createElement('iframe');
+            pdfViewer.src = '/teaching-python/pdfjs/web/viewer.html?file=/teaching-python/Python_Certification_Curriculum.pdf';
+            pdfViewer.style = 'width:100%; height:100vh; border:none; position:fixed; top:0; left:0;';
+            pdfViewer.onerror = () => {
+                document.body.innerHTML = `
+                    <h1>Pdf Viewer Failed to Load</h1>
+                    <a href="/teaching-python/Python_Certification_Curriculum.pdf" download>Download PDF Instead</a>
+                `;
+            };
+            document.body.appendChild(pdfViewer);
+            window.history.replaceState({}, '', '/teaching-python/');
+        });
+    </script>
+    <style>
+        body { margin: 0; font-family: Arial; }
+        .fallback { padding: 2rem; text-align: center; }
+    </style>
+</head>
+<body>
+    <noscript>
+        <div class="fallback">
+            <h1>JavaScript Required</h1>
+            <a href="/teaching-python/Python_Certification_Curriculum.pdf" download>Download PDF Instead</a>
+        </div>
+    </noscript>
+</body>
+</html>
