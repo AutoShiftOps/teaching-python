@@ -1,0 +1,141 @@
+{
+  "id": 4,
+  "name": "Test 4 — Functions",
+  "topic": "def, return, scope, *args, lambda, recursion",
+  "emoji": "⚙️",
+  "color": "t4",
+  "duration_seconds": 2700,
+  "pass_mark": 70,
+  "questions": [
+    {
+      "id": "4-1",
+      "text": "What is the output?",
+      "code": "def f(x, y=10):\n    return x + y\nprint(f(5))",
+      "options": ["15", "Error", "5", "10"],
+      "answer": 0,
+      "explanation": "y has a default value of 10. Calling f(5) uses x=5, y=10. Returns 5+10=15."
+    },
+    {
+      "id": "4-2",
+      "text": "What is the output?",
+      "code": "x = 5\ndef change():\n    x = 10\n    print(x)\nchange()\nprint(x)",
+      "options": ["10 10", "10 5", "5 5", "5 10"],
+      "answer": 1,
+      "explanation": "x inside change() is a local variable. It shadows the global x but does not modify it. After change(), global x is still 5."
+    },
+    {
+      "id": "4-3",
+      "text": "What does a function return if there is no return statement?",
+      "code": null,
+      "options": ["0", "''", "None", "False"],
+      "answer": 2,
+      "explanation": "In Python, a function without a return statement (or with a bare return) implicitly returns None."
+    },
+    {
+      "id": "4-4",
+      "text": "What is the output?",
+      "code": "def total(*args):\n    return sum(args)\nprint(total(1, 2, 3, 4, 5))",
+      "options": ["15", "(1,2,3,4,5)", "Error", "[1,2,3,4,5]"],
+      "answer": 0,
+      "explanation": "*args collects all positional arguments into a tuple. sum((1,2,3,4,5)) = 15."
+    },
+    {
+      "id": "4-5",
+      "text": "What is the output of this lambda?",
+      "code": "f = lambda x, y: x * y\nprint(f(3, 4))",
+      "options": ["12", "7", "34", "Error"],
+      "answer": 0,
+      "explanation": "lambda x, y: x * y defines an anonymous function. f(3,4) returns 3*4=12."
+    },
+    {
+      "id": "4-6",
+      "text": "What is the output?",
+      "code": "def countdown(n):\n    if n == 0:\n        return 'Go!'\n    return str(n) + ' ' + countdown(n - 1)\nprint(countdown(3))",
+      "options": ["3 2 1 Go!", "Go! 1 2 3", "3 2 1", "Error"],
+      "answer": 0,
+      "explanation": "Recursive calls build: countdown(3)='3 '+countdown(2)='3 2 '+countdown(1)='3 2 1 '+countdown(0)='3 2 1 Go!'"
+    },
+    {
+      "id": "4-7",
+      "text": "What is the output?",
+      "code": "def f(lst=[]):\n    lst.append(1)\n    return lst\nprint(f())\nprint(f())",
+      "options": ["[1] [1]", "[1] [1,1]", "[1] [2]", "Error"],
+      "answer": 1,
+      "explanation": "Mutable default arguments are created once and shared across calls. The same list persists between calls — a classic Python gotcha."
+    },
+    {
+      "id": "4-8",
+      "text": "What does **kwargs capture?",
+      "code": null,
+      "options": [
+        "All positional arguments as a tuple",
+        "All keyword arguments as a dictionary",
+        "All arguments as a list",
+        "Only the first keyword argument"
+      ],
+      "answer": 1,
+      "explanation": "**kwargs captures all keyword arguments (named arguments) passed to a function and stores them as a dictionary."
+    },
+    {
+      "id": "4-9",
+      "text": "What is the output?",
+      "code": "def outer():\n    x = 10\n    def inner():\n        print(x)\n    inner()\nouter()",
+      "options": ["10", "Error", "None", "NameError"],
+      "answer": 0,
+      "explanation": "inner() can access x from outer()'s scope. This is called a closure. Python looks up variables using the LEGB rule (Local, Enclosing, Global, Built-in)."
+    },
+    {
+      "id": "4-10",
+      "text": "Which is the correct way to document a function in Python?",
+      "code": null,
+      "options": [
+        "// This function adds two numbers",
+        "# This function adds two numbers (inside the function body)",
+        "\"\"\"This function adds two numbers.\"\"\" (as first statement in function)",
+        "describe(\"This function adds two numbers\")"
+      ],
+      "answer": 2,
+      "explanation": "Docstrings are triple-quoted strings placed as the first statement in a function. They are accessible via help() and the __doc__ attribute."
+    },
+    {
+      "id": "4-11",
+      "text": "What is the output?",
+      "code": "def fact(n):\n    if n <= 1:\n        return 1\n    return n * fact(n - 1)\nprint(fact(4))",
+      "options": ["24", "12", "4", "Error"],
+      "answer": 0,
+      "explanation": "fact(4) = 4 * fact(3) = 4 * 3 * fact(2) = 4 * 3 * 2 * fact(1) = 4 * 3 * 2 * 1 = 24."
+    },
+    {
+      "id": "4-12",
+      "text": "What is the output?",
+      "code": "nums = [1, 2, 3, 4, 5]\nresult = list(map(lambda x: x**2, nums))\nprint(result)",
+      "options": ["[1,4,9,16,25]", "[2,4,6,8,10]", "[1,2,3,4,5]", "Error"],
+      "answer": 0,
+      "explanation": "map() applies a function to each element. lambda x: x**2 squares each element. list() converts the map object to a list."
+    },
+    {
+      "id": "4-13",
+      "text": "What is the output?",
+      "code": "x = 10\ndef f():\n    global x\n    x = 20\nf()\nprint(x)",
+      "options": ["10", "20", "None", "Error"],
+      "answer": 1,
+      "explanation": "global x inside the function declares that x refers to the global variable. After f(), the global x is changed to 20."
+    },
+    {
+      "id": "4-14",
+      "text": "What will this print?",
+      "code": "def greet(name, msg='Hello'):\n    print(f'{msg}, {name}!')\ngreet(msg='Hi', name='Alex')",
+      "options": ["Hello, Alex!", "Hi, Alex!", "Alex, Hi!", "Error"],
+      "answer": 1,
+      "explanation": "Keyword arguments can be passed in any order. msg='Hi' overrides the default 'Hello'. Output: Hi, Alex!"
+    },
+    {
+      "id": "4-15",
+      "text": "What does list(filter(lambda x: x > 3, [1, 2, 3, 4, 5])) return?",
+      "code": null,
+      "options": ["[4,5]", "[1,2,3]", "[True,True]", "[3,4,5]"],
+      "answer": 0,
+      "explanation": "filter() keeps elements where the function returns True. x>3 is True for 4 and 5. Result: [4, 5]."
+    }
+  ]
+}

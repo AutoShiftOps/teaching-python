@@ -1,0 +1,156 @@
+{
+  "id": 1,
+  "name": "Test 1 — Python Fundamentals",
+  "topic": "Variables, Types, I/O, Operators",
+  "emoji": "🐍",
+  "color": "t1",
+  "duration_seconds": 2700,
+  "pass_mark": 70,
+  "questions": [
+    {
+      "id": "1-1",
+      "text": "What is the output of the following code?",
+      "code": "x = 10\ny = 3\nprint(x // y, x % y)",
+      "options": ["3 1", "3.33 1", "3 3.33", "3 0.33"],
+      "answer": 0,
+      "explanation": "// is floor division (10//3=3). % is modulus/remainder (10%3=1). Both return integers when both operands are integers."
+    },
+    {
+      "id": "1-2",
+      "text": "Which of the following is a valid Python variable name?",
+      "code": null,
+      "options": ["2variable", "my-var", "_myVar", "class"],
+      "answer": 2,
+      "explanation": "Variable names must start with a letter or underscore, not a digit. Hyphens are not allowed. 'class' is a reserved keyword."
+    },
+    {
+      "id": "1-3",
+      "text": "What will type(True + 1) return?",
+      "code": null,
+      "options": ["<class 'bool'>", "<class 'int'>", "<class 'str'>", "TypeError"],
+      "answer": 1,
+      "explanation": "In Python, bool is a subclass of int. True == 1, so True + 1 == 2, which is an int."
+    },
+    {
+      "id": "1-4",
+      "text": "What is the output?",
+      "code": "print(2 ** 3 ** 2)",
+      "options": ["512", "64", "8", "TypeError"],
+      "answer": 0,
+      "explanation": "** is right-associative. It evaluates as 2 ** (3 ** 2) = 2 ** 9 = 512, not (2**3)**2 = 64."
+    },
+    {
+      "id": "1-5",
+      "text": "What does input() always return?",
+      "code": null,
+      "options": ["int", "float", "str", "The type the user enters"],
+      "answer": 2,
+      "explanation": "input() always returns a string, regardless of what the user types. You must explicitly convert with int() or float()."
+    },
+    {
+      "id": "1-6",
+      "text": "What is the result of: not (True and False)?",
+      "code": null,
+      "options": ["True", "False", "None", "SyntaxError"],
+      "answer": 0,
+      "explanation": "True and False = False. not False = True. Evaluate inner expression first, then apply not."
+    },
+    {
+      "id": "1-7",
+      "text": "Which statement about Python comments is correct?",
+      "code": null,
+      "options": [
+        "# is for single-line, /* */ for multi-line",
+        "# is for single-line, triple quotes for docstrings/multi-line",
+        "// is for single-line comments",
+        "Comments affect program execution"
+      ],
+      "answer": 1,
+      "explanation": "Python uses # for single-line comments. Triple-quoted strings are used as docstrings or informal multi-line comments. There is no /* */ in Python."
+    },
+    {
+      "id": "1-8",
+      "text": "What is the output?",
+      "code": "x = 5\nx += 3\nx *= 2\nprint(x)",
+      "options": ["16", "11", "13", "21"],
+      "answer": 0,
+      "explanation": "x=5, then x+=3 makes x=8, then x*=2 makes x=16. Augmented assignment operators modify in place."
+    },
+    {
+      "id": "1-9",
+      "text": "What is the output of: print(10 / 4)?",
+      "code": null,
+      "options": ["2", "2.5", "2.0", "2.25"],
+      "answer": 1,
+      "explanation": "/ always returns a float in Python 3, even when both operands are integers. 10/4 = 2.5."
+    },
+    {
+      "id": "1-10",
+      "text": "Which line correctly prints: My score is 95.50%",
+      "code": null,
+      "options": [
+        "print(\"My score is \" + 95.5 + \"%\")",
+        "print(f\"My score is {95.5:.2f}%\")",
+        "print(\"My score is {:.2f}%\")",
+        "print(\"My score is %s%\" % 95.5)"
+      ],
+      "answer": 1,
+      "explanation": "f-strings with :.2f format floats to 2 decimal places. Option A fails (can't concatenate str and float). Option C is missing .format(). Option D would print 95.5%."
+    },
+    {
+      "id": "1-11",
+      "text": "What is the output?",
+      "code": "a = b = c = 5\nb = 10\nprint(a, b, c)",
+      "options": ["5 10 5", "10 10 10", "5 10 10", "5 5 5"],
+      "answer": 0,
+      "explanation": "a=b=c=5 sets all three to 5. Then b=10 only reassigns b. a and c remain 5."
+    },
+    {
+      "id": "1-12",
+      "text": "Which is the correct way to swap two variables in Python?",
+      "code": null,
+      "options": [
+        "a, b = b, a",
+        "temp=a; a=b; b=temp (only this works)",
+        "a=b; b=a",
+        "swap(a, b)"
+      ],
+      "answer": 0,
+      "explanation": "Python supports tuple unpacking for swaps: a,b = b,a. It evaluates the right side first, then assigns. It is the Pythonic way."
+    },
+    {
+      "id": "1-13",
+      "text": "What is the value of: 7 // -2?",
+      "code": null,
+      "options": ["-3", "-4", "3", "4"],
+      "answer": 1,
+      "explanation": "Floor division rounds DOWN (toward negative infinity). 7 / -2 = -3.5, and floor(-3.5) = -4."
+    },
+    {
+      "id": "1-14",
+      "text": "What does the following print?",
+      "code": "print(bool(0), bool(''), bool([]), bool(1))",
+      "options": [
+        "False False False True",
+        "True True True True",
+        "False True False True",
+        "False False True True"
+      ],
+      "answer": 0,
+      "explanation": "In Python, 0, empty string '', and empty list [] are all falsy. 1 is truthy. bool() converts to True/False."
+    },
+    {
+      "id": "1-15",
+      "text": "Which of these correctly reads a float from user input?",
+      "code": null,
+      "options": [
+        "x = input(float)",
+        "x = float(input())",
+        "x = input().float()",
+        "x = float.input()"
+      ],
+      "answer": 1,
+      "explanation": "The correct pattern is to call input() first (returns string), then wrap it in float() to convert. float(input()) or float(input('prompt'))."
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "id": 2,
+  "name": "Test 2 — Control Flow",
+  "topic": "if/elif/else, while, for, break, continue",
+  "emoji": "🔀",
+  "color": "t2",
+  "duration_seconds": 2700,
+  "pass_mark": 70,
+  "questions": [
+    {
+      "id": "2-1",
+      "text": "What is the output?",
+      "code": "for i in range(3):\n    print(i, end=' ')",
+      "options": ["0 1 2 ", "1 2 3 ", "0 1 2 3 ", "1 2 "],
+      "answer": 0,
+      "explanation": "range(3) generates 0, 1, 2. The end=' ' argument prints each number followed by a space on the same line."
+    },
+    {
+      "id": "2-2",
+      "text": "What is the output?",
+      "code": "x = 10\nif x > 5:\n    print('A')\nelif x > 8:\n    print('B')\nelse:\n    print('C')",
+      "options": ["A", "B", "A B", "C"],
+      "answer": 0,
+      "explanation": "Python evaluates branches top to bottom. x>5 is True, so 'A' is printed and the rest is skipped — elif is never checked."
+    },
+    {
+      "id": "2-3",
+      "text": "What does this print?",
+      "code": "i = 0\nwhile i < 5:\n    i += 1\n    if i == 3:\n        continue\n    print(i, end=' ')",
+      "options": ["1 2 3 4 5 ", "1 2 4 5 ", "0 1 2 4 5 ", "1 2 3 4 "],
+      "answer": 1,
+      "explanation": "continue skips the rest of the loop body for that iteration. When i==3, print is skipped, so 3 is not printed."
+    },
+    {
+      "id": "2-4",
+      "text": "What values does range(1, 10, 3) produce?",
+      "code": null,
+      "options": ["1 4 7", "1 3 6 9", "1 4 7 10", "0 3 6 9"],
+      "answer": 0,
+      "explanation": "range(start, stop, step): start=1, stop=10 (exclusive), step=3. So: 1, 4, 7. 10 is excluded."
+    },
+    {
+      "id": "2-5",
+      "text": "What is the output?",
+      "code": "for i in range(5):\n    if i == 3:\n        break\nprint(i)",
+      "options": ["3", "4", "2", "5"],
+      "answer": 0,
+      "explanation": "The loop breaks when i==3. After breaking, i still holds the value 3. print(i) runs after the loop and prints 3."
+    },
+    {
+      "id": "2-6",
+      "text": "What is printed?",
+      "code": "x = 15\nif x % 2 == 0:\n    print('even')\nif x % 3 == 0:\n    print('div3')\nif x % 5 == 0:\n    print('div5')",
+      "options": ["div3", "div3 div5", "even div3 div5", "Nothing"],
+      "answer": 1,
+      "explanation": "These are three separate if statements, not elif. Each is checked independently. 15%2=1 (skip), 15%3=0 (print div3), 15%5=0 (print div5)."
+    },
+    {
+      "id": "2-7",
+      "text": "What is the output?",
+      "code": "result = []\nfor i in range(10):\n    if i % 2 == 0:\n        result.append(i)\nprint(result)",
+      "options": ["[0,2,4,6,8]", "[2,4,6,8,10]", "[1,3,5,7,9]", "[0,2,4,6,8,10]"],
+      "answer": 0,
+      "explanation": "range(10) is 0-9. Even numbers in that range: 0,2,4,6,8. 10 is not in range(10)."
+    },
+    {
+      "id": "2-8",
+      "text": "What does this code print?",
+      "code": "for i in range(3):\n    for j in range(3):\n        if i == j:\n            print(i, j)",
+      "options": ["0 0 / 1 1 / 2 2", "0 0", "All 9 combinations", "Nothing"],
+      "answer": 0,
+      "explanation": "The inner loop prints only when i equals j. That happens at (0,0), (1,1), (2,2)."
+    },
+    {
+      "id": "2-9",
+      "text": "What is the value of x after this code?",
+      "code": "x = 0\nfor i in range(1, 6):\n    x += i\nprint(x)",
+      "options": ["15", "10", "14", "16"],
+      "answer": 0,
+      "explanation": "Sum of 1+2+3+4+5 = 15. This is the classic accumulator pattern."
+    },
+    {
+      "id": "2-10",
+      "text": "Which is the correct Python equivalent of a do-while loop?",
+      "code": null,
+      "options": [
+        "do: ... while condition",
+        "while True: ... if condition: break",
+        "loop: ... while condition",
+        "for True: ... if condition: stop"
+      ],
+      "answer": 1,
+      "explanation": "Python has no do-while. The equivalent is: while True: (body) if condition: break. This guarantees at least one execution."
+    },
+    {
+      "id": "2-11",
+      "text": "What is the output?",
+      "code": "print(list(range(5, 0, -1)))",
+      "options": ["[5,4,3,2,1]", "[5,4,3,2,1,0]", "[4,3,2,1,0]", "[1,2,3,4,5]"],
+      "answer": 0,
+      "explanation": "range(5, 0, -1) counts from 5 down to 1 (0 is excluded since stop=0 is exclusive). Result: [5,4,3,2,1]."
+    },
+    {
+      "id": "2-12",
+      "text": "What is printed?",
+      "code": "x = 5\nprint('positive' if x > 0 else 'non-positive')",
+      "options": ["positive", "non-positive", "True", "SyntaxError"],
+      "answer": 0,
+      "explanation": "This is a ternary/conditional expression. Since x=5 > 0 is True, 'positive' is returned and printed."
+    },
+    {
+      "id": "2-13",
+      "text": "What is the output?",
+      "code": "for i in range(3):\n    pass\nprint(i)",
+      "options": ["2", "3", "None", "NameError"],
+      "answer": 0,
+      "explanation": "pass does nothing. The loop completes normally. After the loop, i holds its last value which is 2 (range(3) = 0,1,2)."
+    },
+    {
+      "id": "2-14",
+      "text": "When does the else clause of a for loop execute?",
+      "code": null,
+      "options": [
+        "When the loop exits normally (no break)",
+        "Always, after every loop",
+        "When the loop body is skipped entirely",
+        "When an exception occurs"
+      ],
+      "answer": 0,
+      "explanation": "The else clause of a for/while loop runs only if the loop completes without hitting a break. If break triggers, else is skipped."
+    },
+    {
+      "id": "2-15",
+      "text": "What is the output?",
+      "code": "x = 0\nwhile x < 3:\n    x += 1\nelse:\n    print('done', x)",
+      "options": ["done 3", "done 2", "Nothing", "SyntaxError"],
+      "answer": 0,
+      "explanation": "The while loop runs until x=3. Since no break was used, the else clause runs and prints 'done 3'."
+    }
+  ]
+}

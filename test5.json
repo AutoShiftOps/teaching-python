@@ -1,0 +1,161 @@
+{
+  "id": 5,
+  "name": "Test 5 — Exceptions & Modules",
+  "topic": "try/except, errors, import, math, random",
+  "emoji": "🛡️",
+  "color": "t5",
+  "duration_seconds": 2700,
+  "pass_mark": 70,
+  "questions": [
+    {
+      "id": "5-1",
+      "text": "What error does the following raise?",
+      "code": "lst = [1, 2, 3]\nprint(lst[5])",
+      "options": ["ValueError", "KeyError", "IndexError", "TypeError"],
+      "answer": 2,
+      "explanation": "Accessing a list with an out-of-range index raises IndexError. KeyError is raised for missing dictionary keys."
+    },
+    {
+      "id": "5-2",
+      "text": "What is the output?",
+      "code": "try:\n    print(10 / 0)\nexcept ZeroDivisionError:\n    print('zero')\nfinally:\n    print('done')",
+      "options": ["zero done", "done", "zero", "Error"],
+      "answer": 0,
+      "explanation": "ZeroDivisionError is caught, prints 'zero'. The finally block ALWAYS runs regardless, so 'done' is also printed."
+    },
+    {
+      "id": "5-3",
+      "text": "What error does int('hello') raise?",
+      "code": null,
+      "options": ["TypeError", "ValueError", "SyntaxError", "NameError"],
+      "answer": 1,
+      "explanation": "int() raises ValueError when the string cannot be converted to an integer. TypeError would occur if you passed a completely wrong type like a list."
+    },
+    {
+      "id": "5-4",
+      "text": "What is the output?",
+      "code": "try:\n    x = int('5')\nexcept ValueError:\n    print('error')\nelse:\n    print('ok', x)",
+      "options": ["error", "ok 5", "ok", "Nothing"],
+      "answer": 1,
+      "explanation": "int('5') succeeds, so the except block is skipped. The else block runs when no exception occurs, printing 'ok 5'."
+    },
+    {
+      "id": "5-5",
+      "text": "Which import statement is correct to use sqrt directly?",
+      "code": null,
+      "options": [
+        "import math.sqrt",
+        "from math import sqrt",
+        "import sqrt from math",
+        "sqrt is a built-in, no import needed"
+      ],
+      "answer": 1,
+      "explanation": "'from math import sqrt' imports sqrt directly so you can call sqrt(16). Alternatively, import math then use math.sqrt(16)."
+    },
+    {
+      "id": "5-6",
+      "text": "What does math.ceil(4.1) return?",
+      "code": null,
+      "options": ["4", "4.1", "5", "4.0"],
+      "answer": 2,
+      "explanation": "ceil() rounds UP to the nearest integer. math.ceil(4.1) = 5. math.floor(4.9) would return 4."
+    },
+    {
+      "id": "5-7",
+      "text": "What is the output?",
+      "code": "try:\n    raise ValueError('bad input')\nexcept ValueError as e:\n    print(type(e).__name__, str(e))",
+      "options": ["ValueError bad input", "bad input", "ValueError", "Error bad input"],
+      "answer": 0,
+      "explanation": "raise creates an exception. type(e).__name__ gives 'ValueError', str(e) gives 'bad input'. Both are printed with a space."
+    },
+    {
+      "id": "5-8",
+      "text": "Which statement about the finally clause is TRUE?",
+      "code": null,
+      "options": [
+        "It runs only if no exception occurred",
+        "It runs only if an exception occurred",
+        "It always runs, even if there is a return in try",
+        "It replaces the except clause"
+      ],
+      "answer": 2,
+      "explanation": "finally always executes — even if there is a return, break, or unhandled exception in the try block. It is used for cleanup like closing files."
+    },
+    {
+      "id": "5-9",
+      "text": "What error occurs here?",
+      "code": "def f():\n    print(x)\n    x = 5\nf()",
+      "options": ["NameError", "UnboundLocalError", "SyntaxError", "TypeError"],
+      "answer": 1,
+      "explanation": "When x=5 exists in the function, Python treats x as local throughout the function. Printing x before assignment raises UnboundLocalError."
+    },
+    {
+      "id": "5-10",
+      "text": "What does random.randint(1, 6) return?",
+      "code": null,
+      "options": [
+        "A float between 1 and 6",
+        "An int between 1 and 5",
+        "An int between 1 and 6 inclusive",
+        "An int between 0 and 6"
+      ],
+      "answer": 2,
+      "explanation": "randint(a, b) returns a random integer N such that a <= N <= b. Both endpoints are INCLUDED. This differs from range() where stop is exclusive."
+    },
+    {
+      "id": "5-11",
+      "text": "What is the output?",
+      "code": "import math\nprint(math.floor(-3.2))",
+      "options": ["-3", "-4", "3", "4"],
+      "answer": 1,
+      "explanation": "floor() rounds DOWN toward negative infinity. floor(-3.2) = -4, not -3. This is a very common exam trap."
+    },
+    {
+      "id": "5-12",
+      "text": "Which correctly catches multiple exception types in one except clause?",
+      "code": null,
+      "options": [
+        "except ValueError, TypeError:",
+        "except (ValueError, TypeError):",
+        "except ValueError or TypeError:",
+        "except [ValueError, TypeError]:"
+      ],
+      "answer": 1,
+      "explanation": "Multiple exceptions are caught by putting them in a tuple with parentheses: except (ValueError, TypeError). The parentheses are required."
+    },
+    {
+      "id": "5-13",
+      "text": "What is the output?",
+      "code": "try:\n    raise Exception('test')\nexcept Exception:\n    print('caught')\nexcept:\n    print('bare')",
+      "options": ["caught", "bare", "caught bare", "Exception"],
+      "answer": 0,
+      "explanation": "The first matching except clause is used. Exception matches, so 'caught' is printed. The bare except is not reached."
+    },
+    {
+      "id": "5-14",
+      "text": "What does random.choice([1, 2, 3, 4]) do?",
+      "code": null,
+      "options": [
+        "Always returns 1",
+        "Returns a randomly selected element from the list",
+        "Returns the list sorted randomly",
+        "Raises an error"
+      ],
+      "answer": 1,
+      "explanation": "random.choice(seq) returns a randomly selected element from the non-empty sequence. Each call may return a different element."
+    },
+    {
+      "id": "5-15",
+      "text": "What is the correct order of clauses in a try statement?",
+      "code": null,
+      "options": [
+        "try → finally → except → else",
+        "try → except → else → finally",
+        "try → else → except → finally",
+        "except → try → else → finally"
+      ],
+      "answer": 1,
+      "explanation": "The correct order is: try → except → else → finally. The else block runs if no exception occurred. The finally block always runs last."
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "id": 6,
+  "name": "Test 6 — Full PCEP Simulation",
+  "topic": "All sections — exam-difficulty mixed",
+  "emoji": "🎯",
+  "color": "t6",
+  "duration_seconds": 2700,
+  "pass_mark": 70,
+  "questions": [
+    {
+      "id": "6-1",
+      "text": "What is the output?",
+      "code": "class Dog:\n    def __init__(self, name):\n        self.name = name\n    def bark(self):\n        return f'{self.name} says Woof!'\nd = Dog('Rex')\nprint(d.bark())",
+      "options": ["Rex says Woof!", "Dog says Woof!", "Woof!", "Error"],
+      "answer": 0,
+      "explanation": "self.name is set to 'Rex' in __init__. bark() uses self.name in the f-string. Output: Rex says Woof!"
+    },
+    {
+      "id": "6-2",
+      "text": "What is the output?",
+      "code": "lst = [1, 2, 3, 4, 5]\nprint(lst[2:2])",
+      "options": ["[3]", "[2,3]", "[]", "[2]"],
+      "answer": 2,
+      "explanation": "lst[2:2] is a slice where start==stop. This always returns an empty list []."
+    },
+    {
+      "id": "6-3",
+      "text": "Which of these statements about Python is TRUE?",
+      "code": null,
+      "options": [
+        "Python is compiled directly to machine code",
+        "Python is case-sensitive",
+        "Indentation is optional in Python",
+        "Python requires semicolons at end of lines"
+      ],
+      "answer": 1,
+      "explanation": "Python is case-sensitive (Name and name are different variables). It is interpreted, not compiled to machine code. Indentation is mandatory. Semicolons are optional."
+    },
+    {
+      "id": "6-4",
+      "text": "What is the output?",
+      "code": "x = 'Python'\nprint(x[1:4])",
+      "options": ["yth", "Pyt", "ytho", "ython"],
+      "answer": 0,
+      "explanation": "String indexing: P=0, y=1, t=2, h=3, o=4, n=5. [1:4] returns characters at index 1,2,3 = 'y','t','h' = 'yth'."
+    },
+    {
+      "id": "6-5",
+      "text": "What is the output?",
+      "code": "a = [1, 2]\nb = [3, 4]\nprint(a + b)",
+      "options": ["[4,6]", "[1,2,3,4]", "[1,2],[3,4]", "Error"],
+      "answer": 1,
+      "explanation": "+ on lists concatenates them. [1,2] + [3,4] = [1,2,3,4]. For element-wise addition you would need a list comprehension."
+    },
+    {
+      "id": "6-6",
+      "text": "What does this print?",
+      "code": "d = {'a': 1, 'b': 2, 'c': 3}\nfor k in sorted(d):\n    print(k, end=' ')",
+      "options": ["a b c ", "c b a ", "1 2 3 ", "a b c d "],
+      "answer": 0,
+      "explanation": "sorted(d) sorts the dictionary keys alphabetically. Iterating prints 'a', 'b', 'c' with trailing spaces."
+    },
+    {
+      "id": "6-7",
+      "text": "What is the output?",
+      "code": "print('ha' * 3)",
+      "options": ["ha ha ha", "hahaha", "ha3", "Error"],
+      "answer": 1,
+      "explanation": "String * integer repeats the string. 'ha' * 3 = 'hahaha'. No spaces are added between repetitions."
+    },
+    {
+      "id": "6-8",
+      "text": "What is the output?",
+      "code": "def f(n):\n    return n if n <= 1 else n + f(n - 1)\nprint(f(4))",
+      "options": ["10", "4", "24", "Error"],
+      "answer": 0,
+      "explanation": "f(4) = 4+f(3) = 4+3+f(2) = 4+3+2+f(1) = 4+3+2+1 = 10. This recursively sums 1 to n."
+    },
+    {
+      "id": "6-9",
+      "text": "What is the output?",
+      "code": "s = 'hello world'\nprint(s.title())",
+      "options": ["Hello World", "HELLO WORLD", "hello world", "Hello world"],
+      "answer": 0,
+      "explanation": ".title() capitalises the first letter of each word. 'hello world'.title() = 'Hello World'."
+    },
+    {
+      "id": "6-10",
+      "text": "What does enumerate(['a', 'b', 'c'], start=1) produce?",
+      "code": null,
+      "options": [
+        "[(0,'a'), (1,'b'), (2,'c')]",
+        "[(1,'a'), (2,'b'), (3,'c')]",
+        "['a', 'b', 'c']",
+        "[1, 2, 3]"
+      ],
+      "answer": 1,
+      "explanation": "enumerate(iterable, start=1) produces (index, value) pairs starting from 1. Result: (1,'a'), (2,'b'), (3,'c')."
+    },
+    {
+      "id": "6-11",
+      "text": "What is the output?",
+      "code": "x = [1, 2, 3]\ny = x.copy()\ny.append(4)\nprint(len(x), len(y))",
+      "options": ["3 4", "4 4", "3 3", "4 3"],
+      "answer": 0,
+      "explanation": ".copy() creates an independent shallow copy. Appending to y does not affect x. x has 3 elements, y has 4."
+    },
+    {
+      "id": "6-12",
+      "text": "What is the output?",
+      "code": "print(isinstance(True, int))",
+      "options": ["False", "True", "TypeError", "None"],
+      "answer": 1,
+      "explanation": "bool is a subclass of int in Python. isinstance(True, int) returns True because True is an instance of int."
+    },
+    {
+      "id": "6-13",
+      "text": "What is the output?",
+      "code": "lst = [5, 3, 8, 1, 9, 2]\nprint(min(lst), max(lst), sum(lst))",
+      "options": ["1 9 28", "1 9 27", "5 9 28", "1 5 28"],
+      "answer": 0,
+      "explanation": "min=1, max=9, sum=5+3+8+1+9+2=28."
+    },
+    {
+      "id": "6-14",
+      "text": "What is the output?",
+      "code": "a = 'Python'\nprint(a.find('th'))",
+      "options": ["2", "3", "True", "1"],
+      "answer": 0,
+      "explanation": ".find() returns the starting index of the first occurrence. 'th' starts at index 2 in 'Python' (P=0, y=1, t=2)."
+    },
+    {
+      "id": "6-15",
+      "text": "What is the output?",
+      "code": "data = [3, 1, 4, 1, 5, 9, 2, 6]\nprint(sorted(data)[-1])",
+      "options": ["9", "6", "3", "8"],
+      "answer": 0,
+      "explanation": "sorted(data) returns a new sorted list [1,1,2,3,4,5,6,9]. [-1] gets the last (largest) element: 9."
+    }
+  ]
+}
