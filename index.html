@@ -1,783 +1,1641 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>PCEP Practice Tests</title>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0F0F13;--surface:#17171E;--surface2:#1E1E28;--surface3:#25252F;
-  --border:#2E2E3A;--border2:#3A3A48;
-  --accent:#6C63FF;--accent2:#8B83FF;--accent-bg:rgba(108,99,255,0.12);--accent-border:rgba(108,99,255,0.3);
-  --green:#22C55E;--green-bg:rgba(34,197,94,0.1);
-  --red:#EF4444;--red-bg:rgba(239,68,68,0.1);
-  --amber:#F59E0B;--amber-bg:rgba(245,158,11,0.1);
-  --text:#F1F0FF;--text2:#A09DB8;--text3:#6B6882;
-  --radius:10px;--radius-lg:16px;--shadow:0 4px 24px rgba(0,0,0,0.4);
-}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;line-height:1.6}
-#root{min-height:100vh}
-button{cursor:pointer;font-family:inherit;border:none;outline:none}
-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-code,pre{font-family:'JetBrains Mono',monospace}
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:var(--surface)}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-@keyframes spin{to{transform:rotate(360deg)}}
-.fade-in{animation:fadeIn 0.25s ease forwards}
-.slide-in{animation:slideIn 0.2s ease forwards}
-.app{display:flex;flex-direction:column;min-height:100vh}
-.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
-.nav-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-0.3px}
-.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.nav-right{display:flex;align-items:center;gap:12px}
-.avatar{width:34px;height:34px;border-radius:50%;background:var(--surface3);border:2px solid var(--border2);object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--accent2)}
-.main{flex:1;max-width:860px;margin:0 auto;padding:32px 24px;width:100%}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:var(--radius);font-size:14px;font-weight:500;transition:all 0.15s}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
-.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
-.btn-ghost:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
-.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
-.btn-danger:hover{background:rgba(239,68,68,0.2)}
-.btn-sm{padding:6px 12px;font-size:13px}
-.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
-.login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:48px 40px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shadow)}
-.login-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 20px}
-.login-title{font-size:22px;font-weight:700;letter-spacing:-0.4px;margin-bottom:8px}
-.login-sub{color:var(--text2);font-size:14px;margin-bottom:32px;line-height:1.6}
-.google-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px 20px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-weight:500;color:var(--text);transition:all 0.15s;cursor:pointer}
-.google-btn:hover{background:var(--surface3);border-color:var(--accent-border)}
-.google-icon{width:20px;height:20px}
-.login-features{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px;text-align:left}
-.login-feat{display:flex;align-items:flex-start;gap:8px;padding:10px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--text2)}
-.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text3);font-size:12px}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.dash-header{margin-bottom:28px}
-.dash-title{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px}
-.dash-sub{color:var(--text2);font-size:14px}
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
-.stat-val{font-size:26px;font-weight:700;letter-spacing:-0.5px}
-.stat-label{font-size:12px;color:var(--text2);margin-top:2px}
-.stat-accent{color:var(--accent2)}
-.stat-green{color:var(--green)}
-.stat-amber{color:var(--amber)}
-.tests-grid{display:grid;gap:12px}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PCEP Practice Tests</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
 
-/* Loading skeleton for test cards */
-.test-card-skeleton{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;display:flex;align-items:center;gap:16px}
-.skel{background:var(--surface3);border-radius:6px;animation:pulse 1.4s ease infinite}
-.skel-icon{width:44px;height:44px;border-radius:10px;flex-shrink:0}
-.skel-line{height:12px;flex:1}
-.skel-badge{width:72px;height:24px;border-radius:20px;flex-shrink:0}
+    :root {
+      --bg: #0F0F13;
+      --surface: #17171E;
+      --surface2: #1E1E28;
+      --surface3: #25252F;
+      --border: #2E2E3A;
+      --border2: #3A3A48;
+      --accent: #6C63FF;
+      --accent2: #8B83FF;
+      --accent-bg: rgba(108, 99, 255, 0.12);
+      --accent-border: rgba(108, 99, 255, 0.3);
+      --green: #22C55E;
+      --green-bg: rgba(34, 197, 94, 0.1);
+      --red: #EF4444;
+      --red-bg: rgba(239, 68, 68, 0.1);
+      --amber: #F59E0B;
+      --amber-bg: rgba(245, 158, 11, 0.1);
+      --text: #F1F0FF;
+      --text2: #A09DB8;
+      --text3: #6B6882;
+      --radius: 10px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    }
 
-.test-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;display:flex;align-items:center;gap:16px;transition:all 0.15s;cursor:pointer}
-.test-card:hover{border-color:var(--accent-border);background:var(--surface2);transform:translateY(-1px)}
-.test-num{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.test-info{flex:1}
-.test-name{font-size:15px;font-weight:600;margin-bottom:3px}
-.test-meta{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.score-badge{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;flex-shrink:0}
-.score-pass{background:var(--green-bg);color:var(--green)}
-.score-fail{background:var(--red-bg);color:var(--red)}
-.score-na{background:var(--surface3);color:var(--text3)}
-.t1{background:rgba(108,99,255,0.15);color:#8B83FF}
-.t2{background:rgba(34,197,94,0.15);color:#22C55E}
-.t3{background:rgba(245,158,11,0.15);color:#F59E0B}
-.t4{background:rgba(239,68,68,0.15);color:#EF4444}
-.t5{background:rgba(16,185,129,0.15);color:#10B981}
-.t6{background:rgba(168,85,247,0.15);color:#A855F7}
-.quiz-header{margin-bottom:24px}
-.quiz-nav{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.quiz-title{font-size:18px;font-weight:700;letter-spacing:-0.3px}
-.quiz-meta{font-size:13px;color:var(--text2)}
-.progress-wrap{background:var(--surface3);border-radius:4px;height:4px;margin-bottom:8px}
-.progress-fill{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 0.3s ease}
-.progress-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3)}
-.timer-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
-.timer-warn{border-color:rgba(245,158,11,0.4);color:var(--amber);background:var(--amber-bg)}
-.timer-crit{border-color:rgba(239,68,68,0.4);color:var(--red);background:var(--red-bg);animation:pulse 1s ease infinite}
-.question-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:16px}
-.q-number{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px}
-.q-text{font-size:15px;line-height:1.7;margin-bottom:20px}
-.q-code{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:13px;line-height:1.7;margin:12px 0;overflow-x:auto}
-.q-code .kw{color:#C792EA}
-.q-code .fn{color:#82AAFF}
-.q-code .str{color:#C3E88D}
-.q-code .num{color:#F78C6C}
-.q-code .cmt{color:#546E7A;font-style:italic}
-.options{display:flex;flex-direction:column;gap:10px}
-.option{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all 0.15s;text-align:left;width:100%;font-size:14px;color:var(--text);line-height:1.5}
-.option:hover:not(.disabled){border-color:var(--accent-border);background:var(--accent-bg)}
-.option.selected{border-color:var(--accent);background:var(--accent-bg)}
-.option.correct{border-color:var(--green);background:var(--green-bg)}
-.option.wrong{border-color:var(--red);background:var(--red-bg)}
-.option.disabled{cursor:default}
-.opt-letter{width:24px;height:24px;border-radius:6px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;margin-top:1px}
-.option.selected .opt-letter{background:var(--accent);color:#fff}
-.option.correct .opt-letter{background:var(--green);color:#fff}
-.option.wrong .opt-letter{background:var(--red);color:#fff}
-.explanation{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:14px 16px;margin-top:14px;font-size:13px;color:var(--text2);line-height:1.6}
-.explanation strong{color:var(--text);display:block;margin-bottom:4px}
-.quiz-actions{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
-.q-dots{display:flex;gap:4px;flex-wrap:wrap;max-width:400px}
-.q-dot{width:8px;height:8px;border-radius:2px;background:var(--surface3);cursor:pointer;transition:all 0.1s}
-.q-dot.answered{background:var(--accent)}
-.q-dot.correct-dot{background:var(--green)}
-.q-dot.wrong-dot{background:var(--red)}
-.q-dot.current{transform:scale(1.4)}
-.results-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;text-align:center;margin-bottom:20px}
-.score-circle{width:110px;height:110px;border-radius:50%;margin:0 auto 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:4px solid}
-.score-circle.pass{border-color:var(--green);background:var(--green-bg);color:var(--green)}
-.score-circle.fail{border-color:var(--red);background:var(--red-bg);color:var(--red)}
-.score-pct{font-size:28px;font-weight:700}
-.score-pct-label{font-size:11px;opacity:0.7}
-.result-title{font-size:20px;font-weight:700;margin-bottom:8px}
-.result-sub{color:var(--text2);font-size:14px;margin-bottom:24px}
-.result-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
-.r-stat{background:var(--surface2);border-radius:var(--radius);padding:12px;text-align:center}
-.r-val{font-size:20px;font-weight:700}
-.r-lbl{font-size:11px;color:var(--text2);margin-top:2px}
-.review-section{text-align:left}
-.review-q{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px}
-.review-q-text{font-size:13px;margin-bottom:8px;line-height:1.6}
-.review-answers{display:flex;gap:8px;font-size:12px;flex-wrap:wrap;margin-bottom:8px}
-.ra-correct{color:var(--green)}
-.ra-wrong{color:var(--red)}
-.section-heading{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px}
-.loading{display:flex;align-items:center;justify-content:center;min-height:100vh;gap:12px;color:var(--text2)}
-.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 18px;font-size:13px;box-shadow:var(--shadow);z-index:999;animation:fadeIn 0.2s ease}
-.toast.success{border-color:rgba(34,197,94,0.3);color:var(--green)}
-.toast.error{border-color:rgba(239,68,68,0.3);color:var(--red)}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      line-height: 1.6
+    }
 
-/* Error banner */
-.load-error{background:var(--red-bg);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius);padding:12px 16px;font-size:13px;color:var(--red);margin-bottom:12px}
+    #root {
+      min-height: 100vh
+    }
 
-@media(max-width:600px){
-  .stats-row{grid-template-columns:1fr 1fr}
-  .result-stats{grid-template-columns:1fr 1fr}
-  .main{padding:20px 16px}
-  .question-card{padding:20px}
-  .login-features{grid-template-columns:1fr}
-  .login-card{padding:32px 24px}
-  .quiz-nav{flex-wrap:wrap}
-}
-</style>
-</head>
-<body>
-<div id="root"></div>
-<script type="text/babel">
-const { useState, useEffect, useRef, useCallback } = React;
+    button {
+      cursor: pointer;
+      font-family: inherit;
+      border: none;
+      outline: none
+    }
 
-// ─── CONFIG — replace with your Supabase values ──────────────────────────────
-const SUPABASE_URL  = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px
+    }
 
-// ─── Dynamic loader ───────────────────────────────────────────────────────────
-// Reads manifest.json → fetches each listed test JSON → returns array of tests.
-// To add a new test: drop a new testN.json in /tests, add the path to manifest.json.
-async function loadAllTests() {
-  const manifestRes = await fetch('./manifest.json?v=' + Date.now());
-  if (!manifestRes.ok) throw new Error('Could not load manifest.json');
-  const manifest = await manifestRes.json();
+    code,
+    pre {
+      font-family: 'JetBrains Mono', monospace
+    }
 
-  const results = await Promise.allSettled(
-    manifest.tests.map(path =>
-      fetch('./' + path + '?v=' + Date.now())
-        .then(r => { if (!r.ok) throw new Error('Failed: ' + path); return r.json(); })
-    )
-  );
+    ::-webkit-scrollbar {
+      width: 6px
+    }
 
-  const tests = [];
-  const errors = [];
-  results.forEach((r, i) => {
-    if (r.status === 'fulfilled') tests.push(r.value);
-    else errors.push(manifest.tests[i] + ': ' + r.reason?.message);
-  });
+    ::-webkit-scrollbar-track {
+      background: var(--surface)
+    }
 
-  // Sort by id so order matches manifest order
-  tests.sort((a, b) => a.id - b.id);
-  return { tests, errors };
-}
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px
+    }
 
-// ─── Supabase helpers ─────────────────────────────────────────────────────────
-async function saveResult(user, testId, score, total, answers) {
-  if (user.id === 'guest') return true;
-  const pct = Math.round((score / total) * 100);
-  const { error } = await supabase.from('test_results').upsert({
-    user_id: user.id,
-    email: user.email,
-    test_id: testId,
-    score, total,
-    percentage: pct,
-    answers: JSON.stringify(answers),
-    passed: pct >= 70,
-    completed_at: new Date().toISOString()
-  }, { onConflict: 'user_id,test_id' });
-  return !error;
-}
-
-async function loadResults(userId) {
-  if (userId === 'guest') return {};
-  const { data, error } = await supabase
-    .from('test_results').select('*').eq('user_id', userId);
-  if (error) return {};
-  const map = {};
-  data?.forEach(r => { map[r.test_id] = r; });
-  return map;
-}
-
-async function resetResults(userId) {
-  if (userId === 'guest') return true;
-  const { error } = await supabase
-    .from('test_results').delete().eq('user_id', userId);
-  return !error;
-}
-
-// ─── Utilities ────────────────────────────────────────────────────────────────
-function Toast({ msg, type, onDone }) {
-  useEffect(() => { const t = setTimeout(onDone, 2800); return () => clearTimeout(t); }, []);
-  return <div className={`toast ${type}`}>{msg}</div>;
-}
-
-function Timer({ seconds, onExpire }) {
-  const [left, setLeft] = useState(seconds);
-  useEffect(() => {
-    const t = setInterval(() => setLeft(p => {
-      if (p <= 1) { clearInterval(t); onExpire(); return 0; }
-      return p - 1;
-    }), 1000);
-    return () => clearInterval(t);
-  }, []);
-  const m = String(Math.floor(left / 60)).padStart(2, '0');
-  const s = String(left % 60).padStart(2, '0');
-  const cls = left < 60 ? 'timer-crit' : left < 180 ? 'timer-warn' : '';
-  return <div className={`timer-badge ${cls}`}>⏱ {m}:{s}</div>;
-}
-
-function CodeBlock({ code }) {
-  const lines = code.split('\n').map((line, i) => {
-    const esc = line
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const hi = esc
-      .replace(/(#[^'"]*)$/gm, m => `<span class="cmt">${m}</span>`)
-      .replace(/\b(def|class|return|if|elif|else|for|while|in|not|and|or|True|False|None|import|from|as|pass|break|continue|global|lambda|try|except|finally|raise|with|yield|print|self)\b/g,
-        '<span class="kw">$1</span>')
-      .replace(/(['"])(.*?)\1/g, '<span class="str">$1$2$1</span>')
-      .replace(/\b(\d+\.?\d*)\b/g, '<span class="num">$1</span>');
-    return <div key={i} dangerouslySetInnerHTML={{ __html: hi || '&nbsp;' }} />;
-  });
-  return <div className="q-code">{lines}</div>;
-}
-
-// ─── Login ────────────────────────────────────────────────────────────────────
-function LoginScreen({ onGuestLogin }) {
-  const [loading, setLoading] = useState(false);
-  const handleGoogle = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.href }
-    });
-    if (error) { setLoading(false); alert(error.message); }
-  };
-  return (
-    <div className="login-screen">
-      <div className="login-card fade-in">
-        <div className="login-logo">🐍</div>
-        <h1 className="login-title">PCEP Practice Tests</h1>
-        <p className="login-sub">
-          6 full-length practice exams aligned to the Python Institute PCEP
-          certification. Track progress, identify weak spots, pass with confidence.
-        </p>
-        <button className="google-btn" onClick={handleGoogle} disabled={loading}>
-          <svg className="google-icon" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-          </svg>
-          {loading ? 'Redirecting…' : 'Continue with Google'}
-        </button>
-        <div className="divider">or</div>
-        <button className="btn btn-ghost" style={{width:'100%',justifyContent:'center'}}
-          onClick={onGuestLogin}>
-          Try as Guest (no progress saved)
-        </button>
-        <div className="login-features">
-          {[
-            ['📊','Scores saved per test'],['🔄','Reset progress any time'],
-            ['🎯','15 PCEP-format questions'],['⏱','45-minute timed sessions'],
-          ].map(([icon, text]) => (
-            <div key={text} className="login-feat"><span>{icon}</span>{text}</div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Dashboard ────────────────────────────────────────────────────────────────
-function Dashboard({ user, tests, loadErrors, results, onStart, onReset, onLogout }) {
-  const [resetting, setResetting] = useState(false);
-  const [toast, setToast] = useState(null);
-
-  const done  = Object.keys(results).length;
-  const avg   = done === 0 ? 0
-    : Math.round(Object.values(results).reduce((s,r) => s + r.percentage, 0) / done);
-  const passed = Object.values(results).filter(r => r.passed).length;
-  const name  = user?.user_metadata?.full_name?.split(' ')[0]
-    || user?.email?.split('@')[0] || 'Student';
-
-  const handleReset = async () => {
-    if (!confirm('Reset all test results? This cannot be undone.')) return;
-    setResetting(true);
-    const ok = await onReset();
-    setResetting(false);
-    setToast(ok
-      ? { msg: 'All results cleared.', type: 'success' }
-      : { msg: 'Reset failed. Try again.', type: 'error' });
-  };
-
-  return (
-    <div className="fade-in">
-      <div className="dash-header">
-        <h1 className="dash-title">Welcome back, {name} 👋</h1>
-        <p className="dash-sub">
-          PCEP Practice Tests · Pass mark: 70% · 15 questions · 45 min each
-        </p>
-      </div>
-
-      {/* Load errors — shown if a JSON file failed */}
-      {loadErrors.length > 0 && (
-        <div className="load-error">
-          ⚠ Some test files could not be loaded: {loadErrors.join(' | ')}
-        </div>
-      )}
-
-      <div className="stats-row">
-        <div className="stat-card">
-          <div className={`stat-val ${done > 0 ? 'stat-accent' : ''}`}>{done}/{tests.length}</div>
-          <div className="stat-label">Tests completed</div>
-        </div>
-        <div className="stat-card">
-          <div className={`stat-val ${avg >= 70 ? 'stat-green' : avg > 0 ? 'stat-amber' : ''}`}>
-            {done > 0 ? avg + '%' : '—'}
-          </div>
-          <div className="stat-label">Average score</div>
-        </div>
-        <div className="stat-card">
-          <div className={`stat-val ${passed > 0 ? 'stat-green' : ''}`}>
-            {passed}/{done || '—'}
-          </div>
-          <div className="stat-label">Tests passed</div>
-        </div>
-      </div>
-
-      <div className="tests-grid">
-        {tests.map(t => {
-          const r = results[t.id];
-          return (
-            <div key={t.id} className="test-card" onClick={() => onStart(t)}>
-              <div className={`test-num ${t.color || 't1'}`}>{t.emoji || '📝'}</div>
-              <div className="test-info">
-                <div className="test-name">{t.name}</div>
-                <div className="test-meta">
-                  <span>{t.questions.length} questions</span>
-                  <span>{Math.round((t.duration_seconds || 2700) / 60)} min</span>
-                  <span>{t.topic}</span>
-                </div>
-              </div>
-              {r ? (
-                <span className={`score-badge ${r.passed ? 'score-pass' : 'score-fail'}`}>
-                  {r.percentage}% {r.passed ? '✓' : '✗'}
-                </span>
-              ) : (
-                <span className="score-badge score-na">Not taken</span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',
-        marginTop:20,paddingTop:16,borderTop:'1px solid var(--border)'}}>
-        <button className="btn btn-danger btn-sm"
-          onClick={handleReset} disabled={resetting || done === 0}>
-          {resetting ? '…' : '↺ Reset all progress'}
-        </button>
-        <button className="btn btn-ghost btn-sm" onClick={onLogout}>Sign out</button>
-      </div>
-
-      {toast && <Toast {...toast} onDone={() => setToast(null)} />}
-    </div>
-  );
-}
-
-// ─── Quiz ─────────────────────────────────────────────────────────────────────
-function QuizScreen({ test, user, onFinish, onBack }) {
-  const total = test.questions.length;
-  const [current,  setCurrent]  = useState(0);
-  const [selected, setSelected] = useState(Array(total).fill(null));
-  const [revealed, setRevealed] = useState(Array(total).fill(false));
-  const [submitted, setSubmitted] = useState(false);
-
-  const q = test.questions[current];
-
-  const handleSelect = idx => {
-    if (submitted || revealed[current]) return;
-    setSelected(prev => { const n=[...prev]; n[current]=idx; return n; });
-    setRevealed(prev => { const n=[...prev]; n[current]=true; return n; });
-  };
-
-  const handleSubmit = useCallback(async () => {
-    if (submitted) return;
-    setSubmitted(true);
-    const score = selected.filter((s, i) => s === test.questions[i].answer).length;
-    const answers = selected.map((s, i) => ({
-      q: i,
-      selected: s,
-      correct: test.questions[i].answer,
-      right: s === test.questions[i].answer
-    }));
-    await saveResult(user, test.id, score, total, answers);
-    onFinish({ score, total, answers, test });
-  }, [submitted, selected, test, user, total, onFinish]);
-
-  const answeredCount = selected.filter(s => s !== null).length;
-  const progress = ((current + 1) / total) * 100;
-
-  return (
-    <div className="fade-in">
-      <div className="quiz-header">
-        <div className="quiz-nav">
-          <button className="btn btn-ghost btn-sm" onClick={onBack}>← Back</button>
-          <div style={{flex:1}}>
-            <div className="quiz-title">{test.name}</div>
-            <div className="quiz-meta">
-              Question {current + 1} of {total} · {answeredCount} answered
-            </div>
-          </div>
-          <Timer seconds={test.duration_seconds || 2700} onExpire={handleSubmit} />
-        </div>
-        <div className="progress-wrap">
-          <div className="progress-fill" style={{width: `${progress}%`}} />
-        </div>
-        <div className="progress-labels">
-          <span>{current + 1}/{total}</span>
-          <span>{Math.round(progress)}%</span>
-        </div>
-      </div>
-
-      <div className="question-card slide-in" key={current}>
-        <div className="q-number">Question {current + 1}</div>
-        <div className="q-text">{q.text}</div>
-        {q.code && <CodeBlock code={q.code} />}
-        <div className="options">
-          {q.options.map((opt, i) => {
-            let cls = 'option';
-            if (revealed[current]) {
-              if (i === q.answer)            cls += ' correct disabled';
-              else if (i === selected[current]) cls += ' wrong disabled';
-              else                           cls += ' disabled';
-            } else if (selected[current] === i) cls += ' selected';
-            return (
-              <button key={i} className={cls} onClick={() => handleSelect(i)}>
-                <span className="opt-letter">{String.fromCharCode(65 + i)}</span>
-                <span>{opt}</span>
-              </button>
-            );
-          })}
-        </div>
-        {revealed[current] && (
-          <div className="explanation fade-in">
-            <strong>
-              {selected[current] === q.answer ? '✓ Correct!' : '✗ Incorrect'}
-            </strong>
-            {q.explanation}
-          </div>
-        )}
-      </div>
-
-      <div className="quiz-actions">
-        <div className="q-dots">
-          {test.questions.map((_, i) => {
-            let cls = 'q-dot';
-            if (i === current) cls += ' current';
-            if (revealed[i]) {
-              cls += selected[i] === test.questions[i].answer
-                ? ' correct-dot' : ' wrong-dot';
-            } else if (selected[i] !== null) cls += ' answered';
-            return (
-              <div key={i} className={cls}
-                onClick={() => setCurrent(i)} title={`Q${i + 1}`} />
-            );
-          })}
-        </div>
-        <div style={{display:'flex',gap:8}}>
-          <button className="btn btn-ghost btn-sm"
-            disabled={current === 0} onClick={() => setCurrent(c => c - 1)}>← Prev</button>
-          {current < total - 1
-            ? <button className="btn btn-primary btn-sm"
-                onClick={() => setCurrent(c => c + 1)}>Next →</button>
-            : <button className="btn btn-primary btn-sm"
-                onClick={handleSubmit} disabled={answeredCount < total || submitted}>
-                Submit Test
-              </button>
-          }
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Results ──────────────────────────────────────────────────────────────────
-function ResultsScreen({ result, onBack, onRetry }) {
-  const { score, total, answers, test } = result;
-  const pct    = Math.round((score / total) * 100);
-  const passed = pct >= (test.pass_mark || 70);
-  const wrong  = answers.filter(a => !a.right);
-
-  return (
-    <div className="fade-in">
-      <div className="results-card">
-        <div className={`score-circle ${passed ? 'pass' : 'fail'}`}>
-          <div className="score-pct">{pct}%</div>
-          <div className="score-pct-label">{passed ? 'PASS' : 'FAIL'}</div>
-        </div>
-        <h2 className="result-title">
-          {passed ? '🎉 Well done!' : '📚 Keep practising'}
-        </h2>
-        <p className="result-sub">
-          {test.name} — {passed
-            ? `You cleared the ${test.pass_mark || 70}% PCEP threshold.`
-            : `Review the explanations below and retry.`}
-        </p>
-        <div className="result-stats">
-          <div className="r-stat">
-            <div className="r-val" style={{color:'var(--green)'}}>{score}</div>
-            <div className="r-lbl">Correct</div>
-          </div>
-          <div className="r-stat">
-            <div className="r-val" style={{color:'var(--red)'}}>{total - score}</div>
-            <div className="r-lbl">Wrong</div>
-          </div>
-          <div className="r-stat">
-            <div className="r-val" style={{color:'var(--accent2)'}}>{pct}%</div>
-            <div className="r-lbl">Score</div>
-          </div>
-          <div className="r-stat">
-            <div className="r-val">{passed ? '✓' : '✗'}</div>
-            <div className="r-lbl">PCEP Pass</div>
-          </div>
-        </div>
-        <div style={{display:'flex',gap:10,justifyContent:'center'}}>
-          <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
-          <button className="btn btn-primary" onClick={onRetry}>↺ Retry Test</button>
-        </div>
-      </div>
-
-      {wrong.length > 0 && (
-        <div className="review-section">
-          <p className="section-heading">
-            Review wrong answers ({wrong.length})
-          </p>
-          {wrong.map(a => {
-            const q = test.questions[a.q];
-            return (
-              <div key={a.q} className="review-q">
-                <div className="review-q-text">
-                  <strong>Q{a.q + 1}:</strong> {q.text}
-                </div>
-                {q.code && <CodeBlock code={q.code} />}
-                <div className="review-answers">
-                  <span className="ra-wrong">
-                    ✗ You answered: {a.selected !== null
-                      ? q.options[a.selected] : 'Unanswered'}
-                  </span>
-                  <span className="ra-correct">
-                    ✓ Correct: {q.options[a.correct]}
-                  </span>
-                </div>
-                <div className="explanation">
-                  <strong>Explanation</strong>{q.explanation}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Skeleton loader for test cards ──────────────────────────────────────────
-function TestCardSkeleton() {
-  return (
-    <div className="test-card-skeleton">
-      <div className="skel skel-icon" />
-      <div style={{flex:1,display:'flex',flexDirection:'column',gap:8}}>
-        <div className="skel skel-line" style={{width:'60%'}} />
-        <div className="skel skel-line" style={{width:'40%',height:9}} />
-      </div>
-      <div className="skel skel-badge" />
-    </div>
-  );
-}
-
-// ─── Root App ─────────────────────────────────────────────────────────────────
-function App() {
-  const [screen,     setScreen]     = useState('loading');
-  const [user,       setUser]       = useState(null);
-  const [tests,      setTests]      = useState([]);
-  const [loadErrors, setLoadErrors] = useState([]);
-  const [testsReady, setTestsReady] = useState(false);
-  const [results,    setResults]    = useState({});
-  const [activeTest, setActiveTest] = useState(null);
-  const [lastResult, setLastResult] = useState(null);
-
-  // Load tests from JSON files on mount (independent of auth)
-  useEffect(() => {
-    loadAllTests()
-      .then(({ tests: t, errors: e }) => {
-        setTests(t);
-        setLoadErrors(e);
-        setTestsReady(true);
-      })
-      .catch(err => {
-        setLoadErrors([err.message]);
-        setTestsReady(true);
-      });
-  }, []);
-
-  // Auth state
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data?.session) {
-        setUser(data.session.user);
-        setScreen('dashboard');
-      } else {
-        setScreen('login');
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
       }
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_, s) => {
-      if (s) { setUser(s.user); setScreen('dashboard'); }
-    });
-    return () => sub.subscription?.unsubscribe?.();
-  }, []);
 
-  // Load saved results when user is known
-  useEffect(() => {
-    if (user) loadResults(user.id).then(setResults);
-  }, [user]);
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
 
-  const handleGuestLogin = () => {
-    setUser({ id:'guest', email:'guest@pcep.local',
-      user_metadata:{ full_name:'Guest' } });
-    setScreen('dashboard');
-  };
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-12px)
+      }
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null); setResults({}); setScreen('login');
-  };
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
 
-  const handleStart = t => { setActiveTest(t); setScreen('quiz'); };
+    @keyframes pulse {
 
-  const handleFinish = r => {
-    setLastResult(r);
-    if (user && user.id !== 'guest') loadResults(user.id).then(setResults);
-    setScreen('results');
-  };
+      0%,
+      100% {
+        opacity: 1
+      }
 
-  const handleReset = async () => {
-    const ok = await resetResults(user.id);
-    if (ok) setResults({});
-    return ok;
-  };
+      50% {
+        opacity: 0.5
+      }
+    }
 
-  if (screen === 'loading') return (
-    <div className="loading"><div className="spinner"/><span>Loading…</span></div>
-  );
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
 
-  if (screen === 'login') return (
-    <LoginScreen onGuestLogin={handleGuestLogin} />
-  );
+    .fade-in {
+      animation: fadeIn 0.25s ease forwards
+    }
 
-  return (
-    <div className="app">
-      <nav className="nav">
-        <div className="nav-logo">
-          <div className="logo-icon">🐍</div>
-          PCEP Practice
+    .slide-in {
+      animation: slideIn 0.2s ease forwards
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.3px
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--surface3);
+      border: 2px solid var(--border2);
+      object-fit: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent2)
+    }
+
+    .main {
+      flex: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 24px;
+      width: 100%
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff
+    }
+
+    .btn-primary:hover {
+      background: var(--accent2);
+      transform: translateY(-1px)
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid var(--border)
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface2);
+      color: var(--text);
+      border-color: var(--border2)
+    }
+
+    .btn-danger {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.2)
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.2)
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 13px
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none
+    }
+
+    .login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 40px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: var(--shadow)
+    }
+
+    .login-logo {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 20px
+    }
+
+    .login-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      margin-bottom: 8px
+    }
+
+    .login-sub {
+      color: var(--text2);
+      font-size: 14px;
+      margin-bottom: 32px;
+      line-height: 1.6
+    }
+
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 13px 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+      cursor: pointer
+    }
+
+    .google-btn:hover {
+      background: var(--surface3);
+      border-color: var(--accent-border)
+    }
+
+    .google-icon {
+      width: 20px;
+      height: 20px
+    }
+
+    .login-features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 24px;
+      text-align: left
+    }
+
+    .login-feat {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px;
+      background: var(--surface2);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text2)
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      color: var(--text3);
+      font-size: 12px
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border)
+    }
+
+    .dash-header {
+      margin-bottom: 28px
+    }
+
+    .dash-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px
+    }
+
+    .dash-sub {
+      color: var(--text2);
+      font-size: 14px
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 28px
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px
+    }
+
+    .stat-val {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 2px
+    }
+
+    .stat-accent {
+      color: var(--accent2)
+    }
+
+    .stat-green {
+      color: var(--green)
+    }
+
+    .stat-amber {
+      color: var(--amber)
+    }
+
+    .tests-grid {
+      display: grid;
+      gap: 12px
+    }
+
+    /* Loading skeleton for test cards */
+    .test-card-skeleton {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px
+    }
+
+    .skel {
+      background: var(--surface3);
+      border-radius: 6px;
+      animation: pulse 1.4s ease infinite
+    }
+
+    .skel-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      flex-shrink: 0
+    }
+
+    .skel-line {
+      height: 12px;
+      flex: 1
+    }
+
+    .skel-badge {
+      width: 72px;
+      height: 24px;
+      border-radius: 20px;
+      flex-shrink: 0
+    }
+
+    .test-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.15s;
+      cursor: pointer
+    }
+
+    .test-card:hover {
+      border-color: var(--accent-border);
+      background: var(--surface2);
+      transform: translateY(-1px)
+    }
+
+    .test-num {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0
+    }
+
+    .test-info {
+      flex: 1
+    }
+
+    .test-name {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 3px
+    }
+
+    .test-meta {
+      font-size: 12px;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap
+    }
+
+    .score-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0
+    }
+
+    .score-pass {
+      background: var(--green-bg);
+      color: var(--green)
+    }
+
+    .score-fail {
+      background: var(--red-bg);
+      color: var(--red)
+    }
+
+    .score-na {
+      background: var(--surface3);
+      color: var(--text3)
+    }
+
+    .t1 {
+      background: rgba(108, 99, 255, 0.15);
+      color: #8B83FF
+    }
+
+    .t2 {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22C55E
+    }
+
+    .t3 {
+      background: rgba(245, 158, 11, 0.15);
+      color: #F59E0B
+    }
+
+    .t4 {
+      background: rgba(239, 68, 68, 0.15);
+      color: #EF4444
+    }
+
+    .t5 {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10B981
+    }
+
+    .t6 {
+      background: rgba(168, 85, 247, 0.15);
+      color: #A855F7
+    }
+
+    .quiz-header {
+      margin-bottom: 24px
+    }
+
+    .quiz-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px
+    }
+
+    .quiz-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px
+    }
+
+    .quiz-meta {
+      font-size: 13px;
+      color: var(--text2)
+    }
+
+    .progress-wrap {
+      background: var(--surface3);
+      border-radius: 4px;
+      height: 4px;
+      margin-bottom: 8px
+    }
+
+    .progress-fill {
+      height: 4px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.3s ease
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text3)
+    }
+
+    .timer-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums
+    }
+
+    .timer-warn {
+      border-color: rgba(245, 158, 11, 0.4);
+      color: var(--amber);
+      background: var(--amber-bg)
+    }
+
+    .timer-crit {
+      border-color: rgba(239, 68, 68, 0.4);
+      color: var(--red);
+      background: var(--red-bg);
+      animation: pulse 1s ease infinite
+    }
+
+    .question-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 16px
+    }
+
+    .q-number {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px
+    }
+
+    .q-text {
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 20px
+    }
+
+    .q-code {
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 12px 0;
+      overflow-x: auto
+    }
+
+    .q-code .kw {
+      color: #C792EA
+    }
+
+    .q-code .fn {
+      color: #82AAFF
+    }
+
+    .q-code .str {
+      color: #C3E88D
+    }
+
+    .q-code .num {
+      color: #F78C6C
+    }
+
+    .q-code .cmt {
+      color: #546E7A;
+      font-style: italic
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 16px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+      width: 100%;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.5
+    }
+
+    .option:hover:not(.disabled) {
+      border-color: var(--accent-border);
+      background: var(--accent-bg)
+    }
+
+    .option.selected {
+      border-color: var(--accent);
+      background: var(--accent-bg)
+    }
+
+    .option.correct {
+      border-color: var(--green);
+      background: var(--green-bg)
+    }
+
+    .option.wrong {
+      border-color: var(--red);
+      background: var(--red-bg)
+    }
+
+    .option.disabled {
+      cursor: default
+    }
+
+    .opt-letter {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--surface3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+      margin-top: 1px
+    }
+
+    .option.selected .opt-letter {
+      background: var(--accent);
+      color: #fff
+    }
+
+    .option.correct .opt-letter {
+      background: var(--green);
+      color: #fff
+    }
+
+    .option.wrong .opt-letter {
+      background: var(--red);
+      color: #fff
+    }
+
+    .explanation {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.6
+    }
+
+    .explanation strong {
+      color: var(--text);
+      display: block;
+      margin-bottom: 4px
+    }
+
+    .quiz-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px
+    }
+
+    .q-dots {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      max-width: 400px
+    }
+
+    .q-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: var(--surface3);
+      cursor: pointer;
+      transition: all 0.1s
+    }
+
+    .q-dot.answered {
+      background: var(--accent)
+    }
+
+    .q-dot.correct-dot {
+      background: var(--green)
+    }
+
+    .q-dot.wrong-dot {
+      background: var(--red)
+    }
+
+    .q-dot.current {
+      transform: scale(1.4)
+    }
+
+    .results-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 20px
+    }
+
+    .score-circle {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 4px solid
+    }
+
+    .score-circle.pass {
+      border-color: var(--green);
+      background: var(--green-bg);
+      color: var(--green)
+    }
+
+    .score-circle.fail {
+      border-color: var(--red);
+      background: var(--red-bg);
+      color: var(--red)
+    }
+
+    .score-pct {
+      font-size: 28px;
+      font-weight: 700
+    }
+
+    .score-pct-label {
+      font-size: 11px;
+      opacity: 0.7
+    }
+
+    .result-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px
+    }
+
+    .result-sub {
+      color: var(--text2);
+      font-size: 14px;
+      margin-bottom: 24px
+    }
+
+    .result-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px
+    }
+
+    .r-stat {
+      background: var(--surface2);
+      border-radius: var(--radius);
+      padding: 12px;
+      text-align: center
+    }
+
+    .r-val {
+      font-size: 20px;
+      font-weight: 700
+    }
+
+    .r-lbl {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 2px
+    }
+
+    .review-section {
+      text-align: left
+    }
+
+    .review-q {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 10px
+    }
+
+    .review-q-text {
+      font-size: 13px;
+      margin-bottom: 8px;
+      line-height: 1.6
+    }
+
+    .review-answers {
+      display: flex;
+      gap: 8px;
+      font-size: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 8px
+    }
+
+    .ra-correct {
+      color: var(--green)
+    }
+
+    .ra-wrong {
+      color: var(--red)
+    }
+
+    .section-heading {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 12px
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 12px;
+      color: var(--text2)
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 12px 18px;
+      font-size: 13px;
+      box-shadow: var(--shadow);
+      z-index: 999;
+      animation: fadeIn 0.2s ease
+    }
+
+    .toast.success {
+      border-color: rgba(34, 197, 94, 0.3);
+      color: var(--green)
+    }
+
+    .toast.error {
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--red)
+    }
+
+    /* Error banner */
+    .load-error {
+      background: var(--red-bg);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--red);
+      margin-bottom: 12px
+    }
+
+    @media(max-width:600px) {
+      .stats-row {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .result-stats {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .main {
+        padding: 20px 16px
+      }
+
+      .question-card {
+        padding: 20px
+      }
+
+      .login-features {
+        grid-template-columns: 1fr
+      }
+
+      .login-card {
+        padding: 32px 24px
+      }
+
+      .quiz-nav {
+        flex-wrap: wrap
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    // ─── CONFIG — replace with your Supabase values ──────────────────────────────
+    const SUPABASE_URL = 'https://ziwvhmcrcmxqajyqhcfp.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppd3ZobWNyY214cWFqeXFoY2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzY4NjAsImV4cCI6MjA5NzkxMjg2MH0.2t7LONc7tkNhDtl8YDt0v353nFwrEx3ACtPBsAWZy6o';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // ─── Dynamic loader ───────────────────────────────────────────────────────────
+    // Reads manifest.json → fetches each listed test JSON → returns array of tests.
+    // To add a new test: drop a new testN.json in /tests, add the path to manifest.json.
+    async function loadAllTests() {
+      const manifestRes = await fetch('./manifest.json?v=' + Date.now());
+      if (!manifestRes.ok) throw new Error('Could not load manifest.json');
+      const manifest = await manifestRes.json();
+
+      const results = await Promise.allSettled(
+        manifest.tests.map(path =>
+          fetch('./' + path + '?v=' + Date.now())
+            .then(r => { if (!r.ok) throw new Error('Failed: ' + path); return r.json(); })
+        )
+      );
+
+      const tests = [];
+      const errors = [];
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled') tests.push(r.value);
+        else errors.push(manifest.tests[i] + ': ' + r.reason?.message);
+      });
+
+      // Sort by id so order matches manifest order
+      tests.sort((a, b) => a.id - b.id);
+      return { tests, errors };
+    }
+
+    // ─── Supabase helpers ─────────────────────────────────────────────────────────
+    async function saveResult(user, testId, score, total, answers) {
+      if (user.id === 'guest') return true;
+      const pct = Math.round((score / total) * 100);
+      const { error } = await supabase.from('test_results').upsert({
+        user_id: user.id,
+        email: user.email,
+        test_id: testId,
+        score, total,
+        percentage: pct,
+        answers: JSON.stringify(answers),
+        passed: pct >= 70,
+        completed_at: new Date().toISOString()
+      }, { onConflict: 'user_id,test_id' });
+      return !error;
+    }
+
+    async function loadResults(userId) {
+      if (userId === 'guest') return {};
+      const { data, error } = await supabase
+        .from('test_results').select('*').eq('user_id', userId);
+      if (error) return {};
+      const map = {};
+      data?.forEach(r => { map[r.test_id] = r; });
+      return map;
+    }
+
+    async function resetResults(userId) {
+      if (userId === 'guest') return true;
+      const { error } = await supabase
+        .from('test_results').delete().eq('user_id', userId);
+      return !error;
+    }
+
+    // ─── Utilities ────────────────────────────────────────────────────────────────
+    function Toast({ msg, type, onDone }) {
+      useEffect(() => { const t = setTimeout(onDone, 2800); return () => clearTimeout(t); }, []);
+      return <div className={`toast ${type}`}>{msg}</div>;
+    }
+
+    function Timer({ seconds, onExpire }) {
+      const [left, setLeft] = useState(seconds);
+      useEffect(() => {
+        const t = setInterval(() => setLeft(p => {
+          if (p <= 1) { clearInterval(t); onExpire(); return 0; }
+          return p - 1;
+        }), 1000);
+        return () => clearInterval(t);
+      }, []);
+      const m = String(Math.floor(left / 60)).padStart(2, '0');
+      const s = String(left % 60).padStart(2, '0');
+      const cls = left < 60 ? 'timer-crit' : left < 180 ? 'timer-warn' : '';
+      return <div className={`timer-badge ${cls}`}>⏱ {m}:{s}</div>;
+    }
+
+    function CodeBlock({ code }) {
+      const lines = code.split('\n').map((line, i) => {
+        const esc = line
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const hi = esc
+          .replace(/(#[^'"]*)$/gm, m => `<span class="cmt">${m}</span>`)
+          .replace(/\b(def|class|return|if|elif|else|for|while|in|not|and|or|True|False|None|import|from|as|pass|break|continue|global|lambda|try|except|finally|raise|with|yield|print|self)\b/g,
+            '<span class="kw">$1</span>')
+          .replace(/(['"])(.*?)\1/g, '<span class="str">$1$2$1</span>')
+          .replace(/\b(\d+\.?\d*)\b/g, '<span class="num">$1</span>');
+        return <div key={i} dangerouslySetInnerHTML={{ __html: hi || '&nbsp;' }} />;
+      });
+      return <div className="q-code">{lines}</div>;
+    }
+
+    // ─── Login ────────────────────────────────────────────────────────────────────
+    function LoginScreen({ onGuestLogin }) {
+      const [loading, setLoading] = useState(false);
+      const handleGoogle = async () => {
+        setLoading(true);
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: window.location.href }
+        });
+        if (error) { setLoading(false); alert(error.message); }
+      };
+      return (
+        <div className="login-screen">
+          <div className="login-card fade-in">
+            <div className="login-logo">🐍</div>
+            <h1 className="login-title">PCEP Practice Tests</h1>
+            <p className="login-sub">
+              6 full-length practice exams aligned to the Python Institute PCEP
+              certification. Track progress, identify weak spots, pass with confidence.
+            </p>
+            <button className="google-btn" onClick={handleGoogle} disabled={loading}>
+              <svg className="google-icon" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+              </svg>
+              {loading ? 'Redirecting…' : 'Continue with Google'}
+            </button>
+            <div className="divider">or</div>
+            <button className="btn btn-ghost" style={{ width: '100%', justifyContent: 'center' }}
+              onClick={onGuestLogin}>
+              Try as Guest (no progress saved)
+            </button>
+            <div className="login-features">
+              {[
+                ['📊', 'Scores saved per test'], ['🔄', 'Reset progress any time'],
+                ['🎯', '15 PCEP-format questions'], ['⏱', '45-minute timed sessions'],
+              ].map(([icon, text]) => (
+                <div key={text} className="login-feat"><span>{icon}</span>{text}</div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="nav-right">
-          {user && (
-            <>
-              <span style={{fontSize:13,color:'var(--text2)'}}>
-                {user.user_metadata?.full_name || user.email}
-              </span>
-              {user.user_metadata?.avatar_url
-                ? <img src={user.user_metadata.avatar_url} className="avatar" alt=""/>
-                : <div className="avatar">
-                    {(user.user_metadata?.full_name || user.email || 'G')[0].toUpperCase()}
+      );
+    }
+
+    // ─── Dashboard ────────────────────────────────────────────────────────────────
+    function Dashboard({ user, tests, loadErrors, results, onStart, onReset, onLogout }) {
+      const [resetting, setResetting] = useState(false);
+      const [toast, setToast] = useState(null);
+
+      const done = Object.keys(results).length;
+      const avg = done === 0 ? 0
+        : Math.round(Object.values(results).reduce((s, r) => s + r.percentage, 0) / done);
+      const passed = Object.values(results).filter(r => r.passed).length;
+      const name = user?.user_metadata?.full_name?.split(' ')[0]
+        || user?.email?.split('@')[0] || 'Student';
+
+      const handleReset = async () => {
+        if (!confirm('Reset all test results? This cannot be undone.')) return;
+        setResetting(true);
+        const ok = await onReset();
+        setResetting(false);
+        setToast(ok
+          ? { msg: 'All results cleared.', type: 'success' }
+          : { msg: 'Reset failed. Try again.', type: 'error' });
+      };
+
+      return (
+        <div className="fade-in">
+          <div className="dash-header">
+            <h1 className="dash-title">Welcome back, {name} 👋</h1>
+            <p className="dash-sub">
+              PCEP Practice Tests · Pass mark: 70% · 15 questions · 45 min each
+            </p>
+          </div>
+
+          {/* Load errors — shown if a JSON file failed */}
+          {loadErrors.length > 0 && (
+            <div className="load-error">
+              ⚠ Some test files could not be loaded: {loadErrors.join(' | ')}
+            </div>
+          )}
+
+          <div className="stats-row">
+            <div className="stat-card">
+              <div className={`stat-val ${done > 0 ? 'stat-accent' : ''}`}>{done}/{tests.length}</div>
+              <div className="stat-label">Tests completed</div>
+            </div>
+            <div className="stat-card">
+              <div className={`stat-val ${avg >= 70 ? 'stat-green' : avg > 0 ? 'stat-amber' : ''}`}>
+                {done > 0 ? avg + '%' : '—'}
+              </div>
+              <div className="stat-label">Average score</div>
+            </div>
+            <div className="stat-card">
+              <div className={`stat-val ${passed > 0 ? 'stat-green' : ''}`}>
+                {passed}/{done || '—'}
+              </div>
+              <div className="stat-label">Tests passed</div>
+            </div>
+          </div>
+
+          <div className="tests-grid">
+            {tests.map(t => {
+              const r = results[t.id];
+              return (
+                <div key={t.id} className="test-card" onClick={() => onStart(t)}>
+                  <div className={`test-num ${t.color || 't1'}`}>{t.emoji || '📝'}</div>
+                  <div className="test-info">
+                    <div className="test-name">{t.name}</div>
+                    <div className="test-meta">
+                      <span>{t.questions.length} questions</span>
+                      <span>{Math.round((t.duration_seconds || 2700) / 60)} min</span>
+                      <span>{t.topic}</span>
+                    </div>
                   </div>
+                  {r ? (
+                    <span className={`score-badge ${r.passed ? 'score-pass' : 'score-fail'}`}>
+                      {r.percentage}% {r.passed ? '✓' : '✗'}
+                    </span>
+                  ) : (
+                    <span className="score-badge score-na">Not taken</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)'
+          }}>
+            <button className="btn btn-danger btn-sm"
+              onClick={handleReset} disabled={resetting || done === 0}>
+              {resetting ? '…' : '↺ Reset all progress'}
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={onLogout}>Sign out</button>
+          </div>
+
+          {toast && <Toast {...toast} onDone={() => setToast(null)} />}
+        </div>
+      );
+    }
+
+    // ─── Quiz ─────────────────────────────────────────────────────────────────────
+    function QuizScreen({ test, user, onFinish, onBack }) {
+      const total = test.questions.length;
+      const [current, setCurrent] = useState(0);
+      const [selected, setSelected] = useState(Array(total).fill(null));
+      const [revealed, setRevealed] = useState(Array(total).fill(false));
+      const [submitted, setSubmitted] = useState(false);
+
+      const q = test.questions[current];
+
+      const handleSelect = idx => {
+        if (submitted || revealed[current]) return;
+        setSelected(prev => { const n = [...prev]; n[current] = idx; return n; });
+        setRevealed(prev => { const n = [...prev]; n[current] = true; return n; });
+      };
+
+      const handleSubmit = useCallback(async () => {
+        if (submitted) return;
+        setSubmitted(true);
+        const score = selected.filter((s, i) => s === test.questions[i].answer).length;
+        const answers = selected.map((s, i) => ({
+          q: i,
+          selected: s,
+          correct: test.questions[i].answer,
+          right: s === test.questions[i].answer
+        }));
+        await saveResult(user, test.id, score, total, answers);
+        onFinish({ score, total, answers, test });
+      }, [submitted, selected, test, user, total, onFinish]);
+
+      const answeredCount = selected.filter(s => s !== null).length;
+      const progress = ((current + 1) / total) * 100;
+
+      return (
+        <div className="fade-in">
+          <div className="quiz-header">
+            <div className="quiz-nav">
+              <button className="btn btn-ghost btn-sm" onClick={onBack}>← Back</button>
+              <div style={{ flex: 1 }}>
+                <div className="quiz-title">{test.name}</div>
+                <div className="quiz-meta">
+                  Question {current + 1} of {total} · {answeredCount} answered
+                </div>
+              </div>
+              <Timer seconds={test.duration_seconds || 2700} onExpire={handleSubmit} />
+            </div>
+            <div className="progress-wrap">
+              <div className="progress-fill" style={{ width: `${progress}%` }} />
+            </div>
+            <div className="progress-labels">
+              <span>{current + 1}/{total}</span>
+              <span>{Math.round(progress)}%</span>
+            </div>
+          </div>
+
+          <div className="question-card slide-in" key={current}>
+            <div className="q-number">Question {current + 1}</div>
+            <div className="q-text">{q.text}</div>
+            {q.code && <CodeBlock code={q.code} />}
+            <div className="options">
+              {q.options.map((opt, i) => {
+                let cls = 'option';
+                if (revealed[current]) {
+                  if (i === q.answer) cls += ' correct disabled';
+                  else if (i === selected[current]) cls += ' wrong disabled';
+                  else cls += ' disabled';
+                } else if (selected[current] === i) cls += ' selected';
+                return (
+                  <button key={i} className={cls} onClick={() => handleSelect(i)}>
+                    <span className="opt-letter">{String.fromCharCode(65 + i)}</span>
+                    <span>{opt}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {revealed[current] && (
+              <div className="explanation fade-in">
+                <strong>
+                  {selected[current] === q.answer ? '✓ Correct!' : '✗ Incorrect'}
+                </strong>
+                {q.explanation}
+              </div>
+            )}
+          </div>
+
+          <div className="quiz-actions">
+            <div className="q-dots">
+              {test.questions.map((_, i) => {
+                let cls = 'q-dot';
+                if (i === current) cls += ' current';
+                if (revealed[i]) {
+                  cls += selected[i] === test.questions[i].answer
+                    ? ' correct-dot' : ' wrong-dot';
+                } else if (selected[i] !== null) cls += ' answered';
+                return (
+                  <div key={i} className={cls}
+                    onClick={() => setCurrent(i)} title={`Q${i + 1}`} />
+                );
+              })}
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn btn-ghost btn-sm"
+                disabled={current === 0} onClick={() => setCurrent(c => c - 1)}>← Prev</button>
+              {current < total - 1
+                ? <button className="btn btn-primary btn-sm"
+                  onClick={() => setCurrent(c => c + 1)}>Next →</button>
+                : <button className="btn btn-primary btn-sm"
+                  onClick={handleSubmit} disabled={answeredCount < total || submitted}>
+                  Submit Test
+                </button>
               }
-            </>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── Results ──────────────────────────────────────────────────────────────────
+    function ResultsScreen({ result, onBack, onRetry }) {
+      const { score, total, answers, test } = result;
+      const pct = Math.round((score / total) * 100);
+      const passed = pct >= (test.pass_mark || 70);
+      const wrong = answers.filter(a => !a.right);
+
+      return (
+        <div className="fade-in">
+          <div className="results-card">
+            <div className={`score-circle ${passed ? 'pass' : 'fail'}`}>
+              <div className="score-pct">{pct}%</div>
+              <div className="score-pct-label">{passed ? 'PASS' : 'FAIL'}</div>
+            </div>
+            <h2 className="result-title">
+              {passed ? '🎉 Well done!' : '📚 Keep practising'}
+            </h2>
+            <p className="result-sub">
+              {test.name} — {passed
+                ? `You cleared the ${test.pass_mark || 70}% PCEP threshold.`
+                : `Review the explanations below and retry.`}
+            </p>
+            <div className="result-stats">
+              <div className="r-stat">
+                <div className="r-val" style={{ color: 'var(--green)' }}>{score}</div>
+                <div className="r-lbl">Correct</div>
+              </div>
+              <div className="r-stat">
+                <div className="r-val" style={{ color: 'var(--red)' }}>{total - score}</div>
+                <div className="r-lbl">Wrong</div>
+              </div>
+              <div className="r-stat">
+                <div className="r-val" style={{ color: 'var(--accent2)' }}>{pct}%</div>
+                <div className="r-lbl">Score</div>
+              </div>
+              <div className="r-stat">
+                <div className="r-val">{passed ? '✓' : '✗'}</div>
+                <div className="r-lbl">PCEP Pass</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+              <button className="btn btn-primary" onClick={onRetry}>↺ Retry Test</button>
+            </div>
+          </div>
+
+          {wrong.length > 0 && (
+            <div className="review-section">
+              <p className="section-heading">
+                Review wrong answers ({wrong.length})
+              </p>
+              {wrong.map(a => {
+                const q = test.questions[a.q];
+                return (
+                  <div key={a.q} className="review-q">
+                    <div className="review-q-text">
+                      <strong>Q{a.q + 1}:</strong> {q.text}
+                    </div>
+                    {q.code && <CodeBlock code={q.code} />}
+                    <div className="review-answers">
+                      <span className="ra-wrong">
+                        ✗ You answered: {a.selected !== null
+                          ? q.options[a.selected] : 'Unanswered'}
+                      </span>
+                      <span className="ra-correct">
+                        ✓ Correct: {q.options[a.correct]}
+                      </span>
+                    </div>
+                    <div className="explanation">
+                      <strong>Explanation</strong>{q.explanation}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
-      </nav>
+      );
+    }
 
-      <main className="main">
-        {screen === 'dashboard' && (
-          testsReady
-            ? <Dashboard
-                user={user} tests={tests} loadErrors={loadErrors}
-                results={results} onStart={handleStart}
-                onReset={handleReset} onLogout={handleLogout}
+    // ─── Skeleton loader for test cards ──────────────────────────────────────────
+    function TestCardSkeleton() {
+      return (
+        <div className="test-card-skeleton">
+          <div className="skel skel-icon" />
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div className="skel skel-line" style={{ width: '60%' }} />
+            <div className="skel skel-line" style={{ width: '40%', height: 9 }} />
+          </div>
+          <div className="skel skel-badge" />
+        </div>
+      );
+    }
+
+    // ─── Root App ─────────────────────────────────────────────────────────────────
+    function App() {
+      const [screen, setScreen] = useState('loading');
+      const [user, setUser] = useState(null);
+      const [tests, setTests] = useState([]);
+      const [loadErrors, setLoadErrors] = useState([]);
+      const [testsReady, setTestsReady] = useState(false);
+      const [results, setResults] = useState({});
+      const [activeTest, setActiveTest] = useState(null);
+      const [lastResult, setLastResult] = useState(null);
+
+      // Load tests from JSON files on mount (independent of auth)
+      useEffect(() => {
+        loadAllTests()
+          .then(({ tests: t, errors: e }) => {
+            setTests(t);
+            setLoadErrors(e);
+            setTestsReady(true);
+          })
+          .catch(err => {
+            setLoadErrors([err.message]);
+            setTestsReady(true);
+          });
+      }, []);
+
+      // Auth state
+      useEffect(() => {
+        supabase.auth.getSession().then(({ data }) => {
+          if (data?.session) {
+            setUser(data.session.user);
+            setScreen('dashboard');
+          } else {
+            setScreen('login');
+          }
+        });
+        const { data: sub } = supabase.auth.onAuthStateChange((_, s) => {
+          if (s) { setUser(s.user); setScreen('dashboard'); }
+        });
+        return () => sub.subscription?.unsubscribe?.();
+      }, []);
+
+      // Load saved results when user is known
+      useEffect(() => {
+        if (user) loadResults(user.id).then(setResults);
+      }, [user]);
+
+      const handleGuestLogin = () => {
+        setUser({
+          id: 'guest', email: 'guest@pcep.local',
+          user_metadata: { full_name: 'Guest' }
+        });
+        setScreen('dashboard');
+      };
+
+      const handleLogout = async () => {
+        await supabase.auth.signOut();
+        setUser(null); setResults({}); setScreen('login');
+      };
+
+      const handleStart = t => { setActiveTest(t); setScreen('quiz'); };
+
+      const handleFinish = r => {
+        setLastResult(r);
+        if (user && user.id !== 'guest') loadResults(user.id).then(setResults);
+        setScreen('results');
+      };
+
+      const handleReset = async () => {
+        const ok = await resetResults(user.id);
+        if (ok) setResults({});
+        return ok;
+      };
+
+      if (screen === 'loading') return (
+        <div className="loading"><div className="spinner" /><span>Loading…</span></div>
+      );
+
+      if (screen === 'login') return (
+        <LoginScreen onGuestLogin={handleGuestLogin} />
+      );
+
+      return (
+        <div className="app">
+          <nav className="nav">
+            <div className="nav-logo">
+              <div className="logo-icon">🐍</div>
+              PCEP Practice
+            </div>
+            <div className="nav-right">
+              {user && (
+                <>
+                  <span style={{ fontSize: 13, color: 'var(--text2)' }}>
+                    {user.user_metadata?.full_name || user.email}
+                  </span>
+                  {user.user_metadata?.avatar_url
+                    ? <img src={user.user_metadata.avatar_url} className="avatar" alt="" />
+                    : <div className="avatar">
+                      {(user.user_metadata?.full_name || user.email || 'G')[0].toUpperCase()}
+                    </div>
+                  }
+                </>
+              )}
+            </div>
+          </nav>
+
+          <main className="main">
+            {screen === 'dashboard' && (
+              testsReady
+                ? <Dashboard
+                  user={user} tests={tests} loadErrors={loadErrors}
+                  results={results} onStart={handleStart}
+                  onReset={handleReset} onLogout={handleLogout}
+                />
+                : <div>
+                  <div className="dash-header">
+                    <div className="dash-title">Loading tests…</div>
+                  </div>
+                  <div className="tests-grid">
+                    {[1, 2, 3, 4, 5, 6].map(i => <TestCardSkeleton key={i} />)}
+                  </div>
+                </div>
+            )}
+            {screen === 'quiz' && activeTest && (
+              <QuizScreen
+                test={activeTest} user={user}
+                onFinish={handleFinish} onBack={() => setScreen('dashboard')}
               />
-            : <div>
-                <div className="dash-header">
-                  <div className="dash-title">Loading tests…</div>
-                </div>
-                <div className="tests-grid">
-                  {[1,2,3,4,5,6].map(i => <TestCardSkeleton key={i}/>)}
-                </div>
-              </div>
-        )}
-        {screen === 'quiz' && activeTest && (
-          <QuizScreen
-            test={activeTest} user={user}
-            onFinish={handleFinish} onBack={() => setScreen('dashboard')}
-          />
-        )}
-        {screen === 'results' && lastResult && (
-          <ResultsScreen
-            result={lastResult}
-            onBack={() => setScreen('dashboard')}
-            onRetry={() => { setActiveTest(lastResult.test); setScreen('quiz'); }}
-          />
-        )}
-      </main>
-    </div>
-  );
-}
+            )}
+            {screen === 'results' && lastResult && (
+              <ResultsScreen
+                result={lastResult}
+                onBack={() => setScreen('dashboard')}
+                onRetry={() => { setActiveTest(lastResult.test); setScreen('quiz'); }}
+              />
+            )}
+          </main>
+        </div>
+      );
+    }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-</script>
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
 </body>
+
 </html>
