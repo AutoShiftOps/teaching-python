@@ -1035,10 +1035,32 @@
   <script type="text/babel">
     const { useState, useEffect, useRef, useCallback } = React;
 
-    // ─── CONFIG — replace with your Supabase values ──────────────────────────────
-    const SUPABASE_URL = 'https://ziwvhmcrcmxqajyqhcfp.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppd3ZobWNyY214cWFqeXFoY2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzY4NjAsImV4cCI6MjA5NzkxMjg2MH0.2t7LONc7tkNhDtl8YDt0v353nFwrEx3ACtPBsAWZy6o';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    // ─── CONFIG — loaded from /api/config at boot (see initSupabase) ─────────────
+    let supabase;
+    async function initSupabase() {
+      try {
+        const res = await fetch('/api/config');
+        if (!res.ok) throw new Error('Config fetch failed');
+        const { supabaseUrl, supabaseAnon, appUrl } = await res.json();
+        window.__APP_URL__ = appUrl;
+        supabase = window.supabase.createClient(supabaseUrl, supabaseAnon);
+      } catch (e) {
+        console.error('Supabase init failed:', e);
+        supabase = {
+          auth: {
+            getSession: async () => ({ data: {} }),
+            onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+            signInWithOAuth: async () => ({ error: new Error('Auth unavailable') }),
+            signOut: async () => {}
+          },
+          from: () => ({
+            upsert: async () => ({ error: null }),
+            select: () => ({ eq: async () => ({ data: [], error: null }) }),
+            delete: () => ({ eq: async () => ({ error: null }) })
+          })
+        };
+      }
+    }
 
     // ─── Dynamic loader ───────────────────────────────────────────────────────────
     // Reads manifest.json → fetches each listed test JSON → returns array of tests.
@@ -1144,7 +1166,7 @@
         setLoading(true);
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
-          options: { redirectTo: window.location.href }
+          options: { redirectTo: window.__APP_URL__ || window.location.origin }
         });
         if (error) { setLoading(false); alert(error.message); }
       };
@@ -1634,7 +1656,9 @@
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    initSupabase().then(() => {
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    });
   </script>
 </body>
 

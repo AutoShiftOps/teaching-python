@@ -1,5 +1,5 @@
 {
-  "_comment": "Add new test file paths here to register them in the app. The UI will automatically load and display them.",
+  "_comment": "Add new test file paths here to register them. UI loads them automatically.",
   "tests": [
     "tests/test1.json",
     "tests/test2.json",
