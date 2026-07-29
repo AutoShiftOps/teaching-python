@@ -183,6 +183,24 @@
       gap: 12px
     }
 
+    .nav-user {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px
+    }
+
+    .nav-signout {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 11px;
+      color: var(--text3);
+      cursor: pointer
+    }
+
+    .nav-signout:hover { color: var(--text2) }
+
     .avatar {
       width: 34px;
       height: 34px;
@@ -563,6 +581,17 @@
     .t6 {
       background: rgba(168, 85, 247, 0.15);
       color: #A855F7
+    }
+
+    .weak-areas-banner {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+      background: var(--amber-bg); border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: var(--radius); padding: 10px 14px; font-size: 13px;
+      color: var(--amber); margin-bottom: 16px
+    }
+    .weak-chip {
+      background: rgba(245, 158, 11, 0.18); border-radius: 20px;
+      padding: 3px 10px; font-size: 12px; font-weight: 600
     }
 
     .quiz-header {
@@ -1089,6 +1118,29 @@
       return { tests, errors };
     }
 
+    // ─── Practice-by-topic config ─────────────────────────────────────────────────
+    const PRACTICE_TOPICS = [
+      { slug: 'fundamentals',       testId: 1, label: 'Fundamentals' },
+      { slug: 'control-flow',       testId: 2, label: 'Control Flow' },
+      { slug: 'data-collections',   testId: 3, label: 'Data Collections' },
+      { slug: 'functions-scope',    testId: 4, label: 'Functions & Scope' },
+      { slug: 'exceptions-modules', testId: 5, label: 'Exceptions & Modules' },
+    ];
+    const PRACTICE_DURATION_SECONDS = 900; // 15min for 15Qs — lower-stakes drill vs exam's 2700s
+    const PRACTICE_PASS_MARK = 70;
+
+    function buildPracticeTest(sourceTest, slug) {
+      const pt = PRACTICE_TOPICS.find(p => p.slug === slug);
+      return {
+        id: `practice-${slug}`, practiceMode: true, topicSlug: slug,
+        name: pt.label, topic: sourceTest.topic,
+        emoji: sourceTest.emoji, color: sourceTest.color,
+        questions: sourceTest.questions,
+        duration_seconds: PRACTICE_DURATION_SECONDS,
+        pass_mark: PRACTICE_PASS_MARK,
+      };
+    }
+
     // ─── Supabase helpers ─────────────────────────────────────────────────────────
     async function saveResult(user, testId, score, total, answers) {
       if (user.id === 'guest') return true;
@@ -1121,6 +1173,85 @@
       const { error } = await supabase
         .from('test_results').delete().eq('user_id', userId);
       return !error;
+    }
+
+    // ─── Practice-by-topic Supabase helpers ───────────────────────────────────────
+    function defaultProgress(userId) {
+      return {
+        user_id: userId, topics_done: {}, quiz_scores: {}, weak_areas: [],
+        total_questions: 0, total_correct: 0, streak: 0,
+        last_session: null, updated_at: null
+      };
+    }
+
+    async function loadProgress(userId) {
+      if (!userId || userId === 'guest') return defaultProgress(userId);
+      const { data, error } = await supabase
+        .from('pcep_progress').select('*').eq('user_id', userId).maybeSingle();
+      if (error || !data) return defaultProgress(userId);
+      return data;
+    }
+
+    // Append-only log — every attempt is a new row (unlike test_results' per-test upsert).
+    async function saveQuizLog(user, topicSlug, score, total, answers) {
+      if (user.id === 'guest') return true;
+      const { error } = await supabase.from('pcep_quiz_log').insert({
+        user_id: user.id, topic: topicSlug, score, total,
+        answers: JSON.stringify(answers), taken_at: new Date().toISOString()
+      });
+      return !error;
+    }
+
+    // same day -> unchanged | consecutive day -> +1 | any gap -> reset to 1 (browser-local dates)
+    function computeStreak(prevLastSession, prevStreak) {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      if (!prevLastSession) return 1;
+      const last = new Date(prevLastSession); last.setHours(0, 0, 0, 0);
+      const diffDays = Math.round((today - last) / 86400000);
+      if (diffDays === 0) return prevStreak || 1;
+      if (diffDays === 1) return (prevStreak || 0) + 1;
+      return 1;
+    }
+
+    // Matches QuizScreen's onSave(user, test, score, total, answers) signature — drop-in for exam's saveResult.
+    async function savePracticeResult(user, test, score, total, answers) {
+      const topicSlug = test.topicSlug;
+      const pct = Math.round((score / total) * 100);
+      await saveQuizLog(user, topicSlug, score, total, answers);
+      if (user.id === 'guest') return true;
+
+      const prev = await loadProgress(user.id);
+
+      const topics_done = { ...prev.topics_done };
+      if (pct >= PRACTICE_PASS_MARK) topics_done[topicSlug] = true; // monotonic: stays done once passed
+
+      const quiz_scores = { ...prev.quiz_scores };
+      quiz_scores[topicSlug] = Math.max(quiz_scores[topicSlug] || 0, pct); // best score per topic
+
+      // weak_areas recomputed fresh for THIS topic from its latest attempt only.
+      const weak_areas = pct < PRACTICE_PASS_MARK
+        ? Array.from(new Set([...(prev.weak_areas || []), topicSlug]))
+        : (prev.weak_areas || []).filter(w => w !== topicSlug);
+
+      const streak = computeStreak(prev.last_session, prev.streak);
+      const nowIso = new Date().toISOString();
+
+      const { error } = await supabase.from('pcep_progress').upsert({
+        user_id: user.id, email: user.email, topics_done, quiz_scores, weak_areas,
+        total_questions: (prev.total_questions || 0) + total,
+        total_correct: (prev.total_correct || 0) + score,
+        streak, last_session: nowIso, updated_at: nowIso
+      }, { onConflict: 'user_id' });
+      return !error;
+    }
+
+    async function resetPractice(userId) {
+      if (userId === 'guest') return true;
+      const [{ error: e1 }, { error: e2 }] = await Promise.all([
+        supabase.from('pcep_progress').delete().eq('user_id', userId),
+        supabase.from('pcep_quiz_log').delete().eq('user_id', userId)
+      ]);
+      return !e1 && !e2;
     }
 
     // ─── Utilities ────────────────────────────────────────────────────────────────
@@ -1207,7 +1338,7 @@
     }
 
     // ─── Dashboard ────────────────────────────────────────────────────────────────
-    function Dashboard({ user, tests, loadErrors, results, onStart, onReset, onLogout }) {
+    function Dashboard({ user, tests, loadErrors, results, progress, onStart, onStartPractice, onReset }) {
       const [resetting, setResetting] = useState(false);
       const [toast, setToast] = useState(null);
 
@@ -1218,8 +1349,16 @@
       const name = user?.user_metadata?.full_name?.split(' ')[0]
         || user?.email?.split('@')[0] || 'Student';
 
+      const practiceTopics = PRACTICE_TOPICS
+        .map(pt => {
+          const t = tests.find(x => x.id === pt.testId);
+          return t ? { ...pt, name: t.name, emoji: t.emoji, color: t.color, topic: t.topic, questionCount: t.questions.length } : null;
+        })
+        .filter(Boolean);
+      const topicsDoneCount = Object.keys(progress.topics_done || {}).length;
+
       const handleReset = async () => {
-        if (!confirm('Reset all test results? This cannot be undone.')) return;
+        if (!confirm('Reset all test results and practice progress? This cannot be undone.')) return;
         setResetting(true);
         const ok = await onReset();
         setResetting(false);
@@ -1289,15 +1428,55 @@
             })}
           </div>
 
+          <div className="section-heading" style={{ marginTop: 28 }}>Practice by Topic</div>
+
+          {progress.weak_areas && progress.weak_areas.length > 0 && (
+            <div className="weak-areas-banner">
+              <span>Focus on:</span>
+              {progress.weak_areas.map(slug => {
+                const pt = practiceTopics.find(p => p.slug === slug);
+                return <span key={slug} className="weak-chip">{pt ? pt.label : slug}</span>;
+              })}
+            </div>
+          )}
+
+          <p className="dash-sub" style={{ marginBottom: 12 }}>
+            {topicsDoneCount}/5 topics practiced
+            {progress.streak > 0 && ` · 🔥 ${progress.streak}-day streak`}
+          </p>
+
+          <div className="tests-grid">
+            {practiceTopics.map(pt => {
+              const best = progress.quiz_scores ? progress.quiz_scores[pt.slug] : undefined;
+              return (
+                <div key={pt.slug} className="test-card" onClick={() => onStartPractice(pt.slug)}>
+                  <div className={`test-num ${pt.color || 't1'}`}>{pt.emoji || '📝'}</div>
+                  <div className="test-info">
+                    <div className="test-name">{pt.label}</div>
+                    <div className="test-meta">
+                      <span>{pt.questionCount} questions</span>
+                      <span>{Math.round(PRACTICE_DURATION_SECONDS / 60)} min</span>
+                      <span>{pt.topic}</span>
+                    </div>
+                  </div>
+                  {best != null ? (
+                    <span className={`score-badge ${best >= 70 ? 'score-pass' : 'score-fail'}`}>{best}% best</span>
+                  ) : (
+                    <span className="score-badge score-na">Not practiced</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
           <div style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
             marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)'
           }}>
             <button className="btn btn-danger btn-sm"
               onClick={handleReset} disabled={resetting || done === 0}>
               {resetting ? '…' : '↺ Reset all progress'}
             </button>
-            <button className="btn btn-ghost btn-sm" onClick={onLogout}>Sign out</button>
           </div>
 
           {toast && <Toast {...toast} onDone={() => setToast(null)} />}
@@ -1306,7 +1485,7 @@
     }
 
     // ─── Quiz ─────────────────────────────────────────────────────────────────────
-    function QuizScreen({ test, user, onFinish, onBack }) {
+    function QuizScreen({ test, user, onFinish, onBack, onSave }) {
       const total = test.questions.length;
       const [current, setCurrent] = useState(0);
       const [selected, setSelected] = useState(Array(total).fill(null));
@@ -1314,6 +1493,7 @@
       const [submitted, setSubmitted] = useState(false);
 
       const q = test.questions[current];
+      const save = onSave || ((u, t, s, tot, a) => saveResult(u, t.id, s, tot, a));
 
       const handleSelect = idx => {
         if (submitted || revealed[current]) return;
@@ -1331,9 +1511,9 @@
           correct: test.questions[i].answer,
           right: s === test.questions[i].answer
         }));
-        await saveResult(user, test.id, score, total, answers);
+        await save(user, test, score, total, answers);
         onFinish({ score, total, answers, test });
-      }, [submitted, selected, test, user, total, onFinish]);
+      }, [submitted, selected, test, user, total, onFinish, save]);
 
       const answeredCount = selected.filter(s => s !== null).length;
       const progress = ((current + 1) / total) * 100;
@@ -1464,7 +1644,9 @@
             </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
               <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
-              <button className="btn btn-primary" onClick={onRetry}>↺ Retry Test</button>
+              <button className="btn btn-primary" onClick={onRetry}>
+                {test.practiceMode ? '↺ Practice Again' : '↺ Retry Test'}
+              </button>
             </div>
           </div>
 
@@ -1524,6 +1706,7 @@
       const [loadErrors, setLoadErrors] = useState([]);
       const [testsReady, setTestsReady] = useState(false);
       const [results, setResults] = useState({});
+      const [progress, setProgress] = useState(defaultProgress(null));
       const [activeTest, setActiveTest] = useState(null);
       const [lastResult, setLastResult] = useState(null);
 
@@ -1559,7 +1742,10 @@
 
       // Load saved results when user is known
       useEffect(() => {
-        if (user) loadResults(user.id).then(setResults);
+        if (user) {
+          loadResults(user.id).then(setResults);
+          loadProgress(user.id).then(setProgress);
+        }
       }, [user]);
 
       const handleGuestLogin = () => {
@@ -1572,7 +1758,7 @@
 
       const handleLogout = async () => {
         await supabase.auth.signOut();
-        setUser(null); setResults({}); setScreen('login');
+        setUser(null); setResults({}); setProgress(defaultProgress(null)); setScreen('login');
       };
 
       const handleStart = t => { setActiveTest(t); setScreen('quiz'); };
@@ -1583,10 +1769,27 @@
         setScreen('results');
       };
 
+      const handleStartPractice = slug => {
+        const topicDef = PRACTICE_TOPICS.find(p => p.slug === slug);
+        const sourceTest = topicDef && tests.find(t => t.id === topicDef.testId);
+        if (!sourceTest) return;
+        setActiveTest(buildPracticeTest(sourceTest, slug));
+        setScreen('quiz');
+      };
+
+      const handleFinishPractice = r => {
+        setLastResult(r);
+        if (user && user.id !== 'guest') loadProgress(user.id).then(setProgress);
+        setScreen('results');
+      };
+
       const handleReset = async () => {
-        const ok = await resetResults(user.id);
-        if (ok) setResults({});
-        return ok;
+        const [okResults, okPractice] = await Promise.all([
+          resetResults(user.id), resetPractice(user.id)
+        ]);
+        if (okResults) setResults({});
+        if (okPractice) setProgress(defaultProgress(user.id));
+        return okResults && okPractice;
       };
 
       if (screen === 'loading') return (
@@ -1607,9 +1810,12 @@
             <div className="nav-right">
               {user && (
                 <>
-                  <span style={{ fontSize: 13, color: 'var(--text2)' }}>
-                    {user.user_metadata?.full_name || user.email}
-                  </span>
+                  <div className="nav-user">
+                    <span style={{ fontSize: 13, color: 'var(--text2)' }}>
+                      {user.user_metadata?.full_name || user.email}
+                    </span>
+                    <button className="nav-signout" onClick={handleLogout}>Sign out</button>
+                  </div>
                   {user.user_metadata?.avatar_url
                     ? <img src={user.user_metadata.avatar_url} className="avatar" alt="" />
                     : <div className="avatar">
@@ -1626,8 +1832,9 @@
               testsReady
                 ? <Dashboard
                   user={user} tests={tests} loadErrors={loadErrors}
-                  results={results} onStart={handleStart}
-                  onReset={handleReset} onLogout={handleLogout}
+                  results={results} progress={progress}
+                  onStart={handleStart} onStartPractice={handleStartPractice}
+                  onReset={handleReset}
                 />
                 : <div>
                   <div className="dash-header">
@@ -1641,7 +1848,9 @@
             {screen === 'quiz' && activeTest && (
               <QuizScreen
                 test={activeTest} user={user}
-                onFinish={handleFinish} onBack={() => setScreen('dashboard')}
+                onFinish={activeTest.practiceMode ? handleFinishPractice : handleFinish}
+                onSave={activeTest.practiceMode ? savePracticeResult : undefined}
+                onBack={() => setScreen('dashboard')}
               />
             )}
             {screen === 'results' && lastResult && (

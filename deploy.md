@@ -1,23 +1,60 @@
 # PCEP Practice Tests — Deployment Guide
-## Stack: Supabase (Auth + DB) · Google OAuth · Vercel
+## Stack: GitHub repo → Vercel (host) · Supabase (auth + DB) · Google OAuth
 
 ---
 
-## STEP 1 — Create Supabase Project
+## REPO STRUCTURE
 
-1. Go to https://supabase.com → New project
-2. Name it: `pcep-quiz`
-3. Set a strong DB password, choose a region close to you
-4. Wait ~2 minutes for provisioning
+```
+teaching-python/
+├── index.html          ← Full app — never hardcode keys here
+├── manifest.json       ← Registry of test files
+├── vercel.json         ← Vercel routing + JSON headers
+├── .env.example        ← Template for local dev (safe to commit)
+├── .gitignore          ← Keeps .env.local out of git
+├── api/
+│   └── config.js       ← Serverless function: serves keys from env vars
+└── tests/
+    ├── test1.json
+    ├── test2.json
+    ├── test3.json
+    ├── test4.json
+    ├── test5.json
+    └── test6.json
+```
 
 ---
 
-## STEP 2 — Create the Database Table
+## HOW ENV VARS WORK HERE
 
-In Supabase → SQL Editor → New query, paste and run:
+```
+Vercel Dashboard
+  → SUPABASE_URL & SUPABASE_ANON_KEY (set once, never in code)
+       ↓
+  api/config.js (serverless function)
+       ↓  GET /api/config
+  index.html (browser fetches this on load, initialises Supabase)
+```
+
+Your keys are **never in your repo, never in browser source**.
+The Supabase anon key is safe to expose to browsers, but this pattern
+is best practice and lets you rotate keys without touching code.
+
+---
+
+## STEP 1 — Supabase Project
+
+1. Go to https://supabase.com → New project → name it `pcep-quiz`
+2. Wait ~2 min for provisioning
+3. SQL Editor → New query → paste and run `sql_migration.sql` (included in the repo).
+   This is the single source of truth for all three tables (`test_results`,
+   `pcep_progress`, `pcep_quiz_log`) — safe to run on a brand-new project or
+   re-run on an existing one, since it guards every statement with
+   `CREATE TABLE IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS` / `DROP POLICY IF EXISTS`.
+
+   Quick version of just the `test_results` portion:
 
 ```sql
--- Results table
 CREATE TABLE test_results (
   id            UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id       UUID NOT NULL,
@@ -32,162 +69,196 @@ CREATE TABLE test_results (
   UNIQUE(user_id, test_id)
 );
 
--- Row-Level Security: users can only see/edit their own rows
 ALTER TABLE test_results ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can read own results"
-  ON test_results FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own results"
-  ON test_results FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own results"
-  ON test_results FOR UPDATE
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own results"
-  ON test_results FOR DELETE
-  USING (auth.uid() = user_id);
+CREATE POLICY "read own"   ON test_results FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "insert own" ON test_results FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "update own" ON test_results FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "delete own" ON test_results FOR DELETE USING (auth.uid() = user_id);
 ```
+
+4. Settings → API → copy:
+   - **Project URL** → `https://xxxxx.supabase.co`
+   - **anon public key** → `eyJhbGci...`
 
 ---
 
-## STEP 3 — Enable Google OAuth in Supabase
+## STEP 2 — Google OAuth
 
-1. Supabase Dashboard → Authentication → Providers → Google → Enable
-2. You need a Google OAuth Client ID and Secret (step below)
-
-### Get Google OAuth Credentials
-1. Go to https://console.cloud.google.com
-2. Create a new project (or use existing)
-3. APIs & Services → OAuth consent screen → External → Fill in app name
-4. APIs & Services → Credentials → Create Credentials → OAuth Client ID
-5. Application type: **Web application**
-6. Authorised redirect URIs — add:
+1. https://console.cloud.google.com → New project
+2. APIs & Services → OAuth consent screen → External → fill app name
+3. APIs & Services → Credentials → Create → OAuth Client ID → Web application
+4. Authorised redirect URIs — add (you'll get the exact ref from Supabase):
    ```
    https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback
    ```
-   (Find YOUR_PROJECT_REF in Supabase → Settings → API → Project URL)
-7. Copy the Client ID and Client Secret
-8. Paste both back into Supabase → Authentication → Providers → Google
+5. Copy **Client ID** and **Client Secret**
+6. Supabase → Authentication → Providers → Google → Enable → paste both
 
 ---
 
-## STEP 4 — Get Your Supabase Keys
+## STEP 3 — Deploy to Vercel
 
-Supabase Dashboard → Settings → API:
-- **Project URL** → `https://xxxxx.supabase.co`
-- **anon public** key → `eyJhbGci...`
+### Connect repo
+1. https://vercel.com → New Project → Import Git Repository
+2. Select `AutoShiftOps/teaching-python`
+3. Framework preset: **Other**
+4. Root directory: `/` (leave as default)
+5. Click **Deploy** — it will fail on first deploy because env vars aren't set yet, that's fine
 
----
+### Add environment variables
+Vercel → Project → Settings → Environment Variables → add both:
 
-## STEP 5 — Update index.html
+| Name                | Value                                      | Environments        |
+|---------------------|--------------------------------------------|---------------------|
+| `SUPABASE_URL`      | `https://xxxxx.supabase.co`               | Production, Preview |
+| `SUPABASE_ANON_KEY` | `eyJhbGci...`                             | Production, Preview |
+| `APP_URL`           | `https://teaching-python.vercel.app`      | Production, Preview |
 
-Open `index.html`, find these two lines (around line 120):
+> `APP_URL` is used for Google OAuth redirect. Must exactly match the URL you add to Google OAuth origins and Supabase redirect URLs.
 
-```javascript
-const SUPABASE_URL = window.ENV_SUPABASE_URL || 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON = window.ENV_SUPABASE_ANON || 'YOUR_SUPABASE_ANON_KEY';
+> If Google OAuth is already working in production without `APP_URL` set,
+> the fallback (`req.headers.origin`) is handling it. `APP_URL` is optional
+> but recommended for explicitness.
+
+Then: Deployments → top deployment → Redeploy
+
+### Your live URL
 ```
-
-Replace with your actual values:
-```javascript
-const SUPABASE_URL = 'https://xxxxx.supabase.co';
-const SUPABASE_ANON = 'eyJhbGci...your-anon-key...';
+https://teaching-python.vercel.app
 ```
-
-> The anon key is safe to expose in frontend code — it's meant to be public.
-> Row-Level Security policies protect the data.
+(or a custom domain you configure)
 
 ---
 
-## STEP 6 — Deploy to Vercel
+## STEP 4 — Update Google OAuth with Vercel URL
 
-### Option A — Vercel CLI (fastest)
-```bash
-npm i -g vercel
-cd pcep-quiz
-vercel
-# Follow prompts: link to your account, deploy
-# Your URL: https://pcep-quiz-xxxxx.vercel.app
-```
-
-### Option B — Vercel Dashboard (no CLI)
-1. Push your folder to a GitHub repo
-2. Go to https://vercel.com → New Project → Import repo
-3. Framework: **Other** (static HTML)
-4. Root directory: leave as `/`
-5. Deploy
+Google Cloud Console → Credentials → your OAuth Client → edit:
+- Authorised JavaScript origins: `https://teaching-python.vercel.app`
+- Authorised redirect URIs: `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
 
 ---
 
-## STEP 7 — Add Your Vercel URL to Google OAuth
-
-1. Go back to Google Cloud Console → Credentials → Your OAuth Client
-2. Add to **Authorised JavaScript origins**:
-   ```
-   https://your-app.vercel.app
-   ```
-3. Add to **Authorised redirect URIs**:
-   ```
-   https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback
-   ```
-   (Already added in Step 3 — just confirm it's there)
-
----
-
-## STEP 8 — Add Your Vercel URL to Supabase
+## STEP 5 — Update Supabase with Vercel URL
 
 Supabase → Authentication → URL Configuration:
-- **Site URL**: `https://your-app.vercel.app`
-- **Redirect URLs**: `https://your-app.vercel.app`
+- Site URL: `https://teaching-python.vercel.app`
+- Redirect URLs: `https://teaching-python.vercel.app`
 
 ---
 
-## STEP 9 — Test It
+## STEP 6 — Smoke test
 
-1. Open your Vercel URL
-2. Click "Continue with Google"
-3. Sign in → You should be redirected back to the dashboard
-4. Take a test → Check Supabase Table Editor → test_results should have a row
-5. Refresh the page → Your results should persist
+1. Open `https://teaching-python.vercel.app`
+2. Open browser DevTools → Network → look for `/api/config` → should return 200 with JSON
+3. Click "Continue with Google" → sign in → redirected to dashboard
+4. Take a test → finish → check Supabase Table Editor → row should appear in `test_results`
+5. Refresh page → results should persist
+6. Click "Reset all progress" → row deleted from Supabase
 
 ---
 
-## File Structure
+## LOCAL DEVELOPMENT
 
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Clone and enter repo
+git clone https://github.com/AutoShiftOps/teaching-python.git
+cd teaching-python
+
+# Create local env file (gitignored)
+cp .env.example .env.local
+# Edit .env.local → paste your actual Supabase URL and anon key
+
+# Run locally (serves index.html + api/config.js with env vars)
+vercel dev
+# Opens at http://localhost:3000
 ```
-pcep-quiz/
-├── index.html      ← entire app (single file)
-└── DEPLOY.md       ← this guide
+
+---
+
+## ADDING / EDITING QUESTIONS (no Vercel changes needed)
+
+| Task | What to do |
+|------|-----------|
+| Edit a question | Open `tests/testN.json`, change the text/options/answer, commit + push |
+| Add a question | Add object to `questions[]` array in the right JSON file, commit + push |
+| Add a new test | Create `tests/test7.json`, add path to `manifest.json`, commit + push |
+| Remove a question | Delete the object from the array, commit + push |
+
+Vercel auto-deploys on every push to `main`. Changes are live in ~30 seconds.
+
+---
+
+## TROUBLESHOOTING
+
+| Symptom | Fix |
+|---------|-----|
+| `/api/config` returns 500 | Check env vars are set in Vercel dashboard and redeployed |
+| Google sign-in redirect error | Confirm Vercel URL is in Google OAuth origins AND Supabase redirect URLs |
+| Tests show "could not load" | Check `manifest.json` paths match actual filenames in `tests/` |
+| Results don't save | Check Supabase RLS policies were created (Step 1 SQL) |
+| Works locally but not on Vercel | Env vars not set — check Vercel → Settings → Environment Variables |
+
+---
+
+## WHAT ABOUT GitHub Pages?
+
+GitHub Pages **cannot** run serverless functions (`api/config.js` won't work there).
+It also runs Jekyll which interferes with JSON file serving.
+Vercel is the right host for this app.
+
+If you still want the repo listed under autoshiftops.com projects, that still works —
+autoshiftops.com just links to it. The actual app runs on Vercel.
+
+---
+
+## PART C — Practice Mode Tables
+
+`sql_migration.sql` (run once in Step 1) already creates both practice tables
+alongside `test_results`:
+
+- `pcep_progress` — one row per user (keyed by `user_id`), tracks streak / best scores / weak areas
+- `pcep_quiz_log` — one row per attempt (exam and practice), with RLS policies
+
+No separate file or second run is needed — Step 1's migration covers all three
+tables in one pass. Verify in Table Editor — you should see all three tables:
+`test_results`, `pcep_progress`, `pcep_quiz_log`.
+
+### Tier 2 verification checklist (needs live credentials)
+- [x] Sign in with Google OAuth
+- [ ] Complete a practice drill → check `pcep_quiz_log` for a new row with `mode = 'practice'`
+- [ ] Complete an exam → check `test_results` and `pcep_quiz_log` for rows
+- [ ] Check `pcep_progress` for streak and weak_areas updates
+- [ ] Click "Reset all progress" → confirm all three tables cleared for that user
+
+---
+
+## COSMETIC FIX — Practice results subtitle
+
+In `index.html`, find `buildPracticeTest` and change:
+
+```js
+// Before
+name: sourceTest.name   // shows "Test 1 — Python Fundamentals"
+
+// After
+name: pt.label          // shows "Fundamentals"
 ```
 
----
-
-## Troubleshooting
-
-| Issue | Fix |
-|-------|-----|
-| Google login doesn't redirect back | Add Vercel URL to Google OAuth origins |
-| "Invalid API key" error | Check SUPABASE_URL and SUPABASE_ANON in index.html |
-| Results don't save | Check RLS policies in Supabase SQL Editor |
-| Blank page after sign-in | Check Site URL in Supabase Auth settings |
-| Guest mode works but Google doesn't | Confirm redirect URI matches exactly in Google Console |
+One line. Commit message: `fix: practice results subtitle uses topic label not exam name`
 
 ---
 
-## Optional — Environment Variables (production best practice)
+## DEPLOYMENT STATUS
 
-Instead of hardcoding keys in HTML, you can use a Vercel `_config.js` approach or
-host a tiny `config.js` file and load it. For this single-file app, direct
-inclusion of the anon key is safe since Supabase RLS protects the data.
-
----
-
-## Reset Progress (from UI)
-
-The "Reset all progress" button on the dashboard deletes all `test_results` rows
-for the logged-in user. It uses `supabase.from('test_results').delete().eq('user_id', userId)`.
-RLS ensures a user can only delete their own rows.
+| Item                        | Status         | Notes                              |
+|-----------------------------|----------------|-------------------------------------|
+| Vercel deployment           | ✅ Live        | teaching-python.vercel.app         |
+| Google OAuth                | ✅ Working     | Verified in browser                |
+| Supabase tables + RLS       | ✅ Done        | All 3 tables with user_id + RLS    |
+| Practice mode (UI)          | ✅ Live        | 5 topic drills + 6 fixed exams     |
+| Tier 2 (real user data)     | ⏳ Pending     | Run after first real login         |
+| sql_migration.sql           | ✅ In repo     | Use for recreation                 |
